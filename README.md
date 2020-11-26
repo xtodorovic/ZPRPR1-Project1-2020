@@ -1,3 +1,3 @@
-Zaklady Proceduralneho Programovania 1. rocnik 2020
+#Zaklady Proceduralneho Programovania 1. rocnik 2020
 
-Miroslav Todorovic 
+#Miroslav Todorovic 
