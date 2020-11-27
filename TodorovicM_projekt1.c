@@ -119,7 +119,7 @@ int kontrolaZnackeAuta(char *znacka)
 
 int kontrolaUdajov(char* krstne_meno, char* priezvisko, char pohlavie, int rok, char* znacka, float *casy)
 {
-	if(krstne_meno != NULL && priezvisko != NULL && rok != 0 && (pohlavie == 'm' || pohlavie == 'f') && 
+	if(krstne_meno != NULL && priezvisko != NULL && rok > 1800 && (pohlavie == 'm' || pohlavie == 'f') && 
 										znacka != NULL && kontrolaZnackeAuta(znacka) != 0 && casy != NULL  )
 		{
 			return 1;
