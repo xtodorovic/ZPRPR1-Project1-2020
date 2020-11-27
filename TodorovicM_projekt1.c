@@ -34,6 +34,7 @@ int rmdriver(void);
 
 void krstneMenoPriezvisko(char *meno_priezvisko, char *krstne_meno, char *priezvisko);
 void moznosti(void);
+void functionEnd(void);
 
 float najlepsieKolo(float *casy);
 float najhorsieKolo(float *casy);
@@ -51,8 +52,7 @@ int main()
 	
 	while(koniec != 0)
 	{
-		putchar('\n');
-		
+		printf("\n>");
 		scanf(" %c", &vstup);
 		switch(vstup)
 		{
@@ -101,6 +101,11 @@ int main()
 	}
 	
 	return 0;
+}
+
+void functionEnd(void)
+{
+	printf("------------------------------------------------------/\n");
 }
 
 int kontrolaZnackeAuta(char *znacka)
@@ -191,7 +196,7 @@ int sum(void)
 				break;
 			}
 		}
-	printf("--------------------------------------------------------\n");
+	functionEnd();
 	
 	if (fclose(fp) == EOF)
 	{
@@ -277,7 +282,7 @@ int driver(void)
 	}
 	else
 	{
-		printf("--------------------------------------------------------\n");
+		functionEnd();
 	}
 	
 	if(fclose(fp) == EOF)
@@ -344,7 +349,7 @@ int lap(void)
 		printf("Najlepsie kolo: %.3f\n",najlepsi_cas);
 		printf("Jazdec: %s\n", jazdec);
 		printf("Cislo kola: %d\n", kolo);
-		printf("--------------------------------------------------------\n");
+		functionEnd();
 	}
 
 	if(fclose(fp) == EOF)
@@ -418,7 +423,7 @@ int gender(void)
 			printf("Najlepsie kolo: %.3f\n",najlepsi_cas);
 			printf("Jazdec: %s\n", jazdec);
 			printf("Cislo kola: %d\n", kolo);
-			printf("--------------------------------------------------------\n");
+			functionEnd();
 		}
 	}
 	else
@@ -506,7 +511,7 @@ int brand(void)
 		najlepsi_cas = 1000;
 		kolo = 0;
 	}
-	printf("--------------------------------------------------------\n");
+	functionEnd();
 	if(fclose(fp) == EOF)
 	{
 		printf("Subor sa nepodarilo zatvorit.");
@@ -582,7 +587,7 @@ int year(void)
 			printf("nar. %d\n", rok_n);
 			printf("Najlepsie kolo: %.3f\n",najlepsi_cas);
 			printf("Cislo kola: %d\n", kolo);
-			printf("--------------------------------------------------------\n");	
+			functionEnd();	
 		}
 		else
 		{
@@ -661,7 +666,7 @@ int average(void)
 	{
 		printf("\nNajlepsie:\n");
 		printf("%s - %.3f\n", jazdec, najlepsie_priemerne);
-		printf("--------------------------------------------------------\n");
+		functionEnd();
 	}
 	
 	if(fclose(fp) == EOF)
@@ -680,15 +685,19 @@ int average(void)
 
 int under(void)
 {
-	float casy[5];
-	char meno_priezvisko[50];
-	char buffer[100];
-	char jazdec[50];
-	float realne_cislo;
-	int kola;
-	int vypis_casov;
-	int pocet_jazdcov=0;
-	int i;
+	FILE *fp;
+	float *casy = NULL, realne_cislo;
+	char *meno_priezvisko = NULL, *krstne_meno = NULL, *priezvisko = NULL, *znacka = NULL, *jazdec = NULL;
+	char pohlavie;
+	int i, rok, kola, vypis_casov, riadok=0;
+
+	casy = (float *)calloc(MAX_RACE_ROUNDS, sizeof(float));
+	meno_priezvisko = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
+	krstne_meno = (char *)malloc(NAME * sizeof(char));
+	priezvisko = (char *)malloc(SURNAME * sizeof(char));
+	znacka = (char *)malloc(CAR_BRAND * sizeof(char));
+	jazdec = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
+
 	
 	fp = fopen(SUBOR, "r");
 	
@@ -697,64 +706,86 @@ int under(void)
 		printf("Subor sa nepodarilo otvorit.\n");
 		return 0;
 	}
-	printf("Funkcia Under: Vypis hodnot pod vlozenou hodnotou \nZadajte hodnotu: ");
+	printf("\tFunkcia Under: Vypis hodnot pod vlozenou hodnotou.\nZadajte hodnotu: ");
 	scanf("%f", &realne_cislo);
-
-	while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
+	
+	if(realne_cislo > 0)
 	{
-		
-		kola = 0;
-		printf("%s - ", meno_priezvisko);
-		for(i=0; i<MAX_RACE_ROUNDS; i++)
+		while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
 		{
-			if(realne_cislo >= casy[i])
+			riadok++;
+			krstneMenoPriezvisko(meno_priezvisko, krstne_meno, priezvisko);
+	
+			if(kontrolaUdajov(krstne_meno, priezvisko, pohlavie, rok, znacka, casy) != 0) 
 			{
-				kola++;
-				
-			}
-		}
-		if(kola > 1 && kola < MAX_RACE_ROUNDS)
-		{
-			printf("%d kola, ", kola);
-		}
-		else if(kola == 0)
-		{
-			printf("%d kol\n", kola);
-		}
-		else if(kola == 1)
-		{
-			printf("%d kolo, ", kola);
-		}
-		else
-		{	
-			printf("%d kol, ", kola);
-		}
-		
-		vypis_casov = kola;
-		kola = 1;
-		for(i=0; i<MAX_RACE_ROUNDS ;i++)
-		{
-			if(realne_cislo >= casy[i] )
-			{
-				if(vypis_casov == kola)
+				kola = 0;
+				printf("%s - ", meno_priezvisko);
+				for(i=0; i<MAX_RACE_ROUNDS; i++)
 				{
-					printf("%d (%.3f)\n", i+1, casy[i]);	
+					if(realne_cislo >= casy[i])
+					{
+						kola++;
+					}
+				}
+				if(kola > 1 && kola < MAX_RACE_ROUNDS)
+				{
+					printf("%d kola, ", kola);
+				}
+				else if(kola == 0)
+				{
+					printf("%d kol\n", kola);
+				}
+				else if(kola == 1)
+				{
+					printf("%d kolo, ", kola);
 				}
 				else
+				{	
+					printf("%d kol, ", kola);
+				}
+				
+				vypis_casov = kola;
+				kola = 1;
+				for(i=0; i<MAX_RACE_ROUNDS ;i++)
 				{
-					printf("%d (%.3f), ", i+1, casy[i]);
-					kola++;
+					if(realne_cislo >= casy[i] )
+					{
+						if(vypis_casov == kola)
+						{
+							printf("%d (%.3f)\n", i+1, casy[i]);	
+						}
+						else
+						{
+							printf("%d (%.3f), ", i+1, casy[i]);
+							kola++;
+						}
+					}
 				}
 			}
-		}	
+			else
+			{
+				printf("\tCHYBA: Jazdec cislo %d nie je spravne zapisany v subore.\n", riadok);
+				break;
+			}
+		}
+	functionEnd();
 	}
-	
+	else
+	{
+		printf("Funkcia Under: Chyba! Cislo musi byt vacsie od 0.\n");
+	}
 	
 	if(fclose(fp) == EOF)
 	{
 		printf("Subor sa nepodarilo zatvorit.");
 		return 0;
 	}
+	free(casy);
+	free(meno_priezvisko);
+	free(priezvisko);
+	free(krstne_meno);
+	free(znacka);
+	free(jazdec);
 }
 
 int change(void)
@@ -1009,4 +1040,5 @@ void moznosti(void)
 	printf("\tPrikaz \"n\" - Funkcia newdriver(): Pridanie noveho jazdca a zadanie hodnot\n");
 	printf("\tPrikaz \"r\" - Funkcia rmdriver(): Vymazanie jazdca\n");
 	printf("\tPrikaz \"x\" - Ukonci program\n");
+	printf("<---------------------------------------------------------------------------------------------->\n");
 }
