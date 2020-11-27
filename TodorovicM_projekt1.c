@@ -535,7 +535,6 @@ int year(void)
 	priezvisko = (char *)malloc(SURNAME * sizeof(char));
 	znacka = (char *)malloc(CAR_BRAND * sizeof(char));
 	jazdec = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
-
 	
 	fp = fopen("tabulka.csv", "r");
 	
@@ -613,15 +612,18 @@ int year(void)
 
 int average(void)
 {
-	float casy[5];
-	char meno_priezvisko[50];
-	char buffer[100];
-	char jazdec[50];
-	float *priemer_jazdcov;
-	float najlepsie_priemerne = 100;
-	int kolo;
-	int pocet_jazdcov=0;
-	int i=0;
+	FILE *fp;
+	float *casy = NULL, priemer_jazdca = 0, najlepsie_priemerne = 1000;
+	char *meno_priezvisko = NULL, *krstne_meno = NULL, *priezvisko = NULL, *znacka = NULL, *jazdec = NULL;
+	char pohlavie;
+	int rok, kolo, pocet_jazdcov=0, riadok=0;
+
+	casy = (float *)calloc(MAX_RACE_ROUNDS, sizeof(float));
+	meno_priezvisko = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
+	krstne_meno = (char *)malloc(NAME * sizeof(char));
+	priezvisko = (char *)malloc(SURNAME * sizeof(char));
+	znacka = (char *)malloc(CAR_BRAND * sizeof(char));
+	jazdec = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
 	
 	fp = fopen("tabulka.csv", "r");
 	
@@ -630,37 +632,50 @@ int average(void)
 		printf("Subor sa nepodarilo otvorit.\n");
 		return 0;
 	}
-	printf("Funkcia Average - Vypis najlepsieho priemerneho kola: \n");
-	while(!feof(fp))
-	{
-		fgets(buffer, 100, fp);
-		pocet_jazdcov++;	
-	}
-	priemer_jazdcov = (float *)malloc(pocet_jazdcov * sizeof(float));
-	rewind(fp);
-
+	
+	printf("\tFunkcia Average:\nVypis najlepsieho priemerneho kola: \n");
+	
 	while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
 	{
-		priemer_jazdcov[i] = priemerneKolo(casy);
-		printf("%s - %.3f\n", meno_priezvisko, priemer_jazdcov[i]);
-		
-		if(najlepsie_priemerne >= priemer_jazdcov[i])
+		riadok++;
+		krstneMenoPriezvisko(meno_priezvisko, krstne_meno, priezvisko);
+
+		if(kontrolaUdajov(krstne_meno, priezvisko, pohlavie, rok, znacka, casy) != 0) 
 		{
-			strcpy(jazdec, meno_priezvisko);
-			najlepsie_priemerne = priemer_jazdcov[i];
+			priemer_jazdca = priemerneKolo(casy);
+			printf("%s - %.3f\n", meno_priezvisko, priemer_jazdca);
+			
+			if(najlepsie_priemerne >= priemer_jazdca)
+			{
+				strcpy(jazdec, meno_priezvisko);
+				najlepsie_priemerne = priemer_jazdca;
+			}
 		}
-		i++;
+		else
+		{
+			printf("\tCHYBA: Jazdec cislo %d nie je spravne zapisany v subore.\n", riadok);
+			break;
+		}
 	}
-	printf("\nNajlepsie:\n");
-	printf("%s - %.3f\n", jazdec, najlepsie_priemerne);
-	free(priemer_jazdcov);
+	if(jazdec != NULL )
+	{
+		printf("\nNajlepsie:\n");
+		printf("%s - %.3f\n", jazdec, najlepsie_priemerne);
+		printf("--------------------------------------------------------\n");
+	}
+	
 	
 	if(fclose(fp) == EOF)
 	{
 		printf("Subor sa nepodarilo zatvorit.");
 		return 0;
 	}
-	
+	free(casy);
+	free(meno_priezvisko);
+	free(priezvisko);
+	free(krstne_meno);
+	free(znacka);
+	free(jazdec);
 }
 
 int under(void)
