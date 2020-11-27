@@ -93,21 +93,45 @@ int main()
 	return 0;
 }
 
+int kontrolaZnackeAuta(char *znacka)
+{
+	if(strcmp(znacka, "bugatti") == 0)
+	{
+		return 1;
+	}
+	else if(strcmp(znacka, "porsche") == 0)
+	{
+		return 1;
+	}
+	else if(strcmp(znacka, "ferrari") == 0)
+	{
+		return 1;
+	}
+	else if(strcmp(znacka, "honda") == 0)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
 int sum(void)
 {
 	FILE *fp;
-	float *casy;
-	char *meno_priezvisko, *krstne_meno, *priezvisko;
-	char *znacka, pohlavie;
+	float *casy = NULL;
+	char *meno_priezvisko = NULL, *krstne_meno = NULL, *priezvisko = NULL;
+	char *znacka = NULL, pohlavie;
 	int rok, i;
 	
-	fp = fopen(SUBOR, "r");
 	casy = (float *)calloc(5, sizeof(float));
 	meno_priezvisko = (char *)malloc(101 * sizeof(char));
 	krstne_meno = (char *)malloc(51 * sizeof(char));
 	priezvisko = (char *)malloc(51 * sizeof(char));
 	znacka = (char *)malloc(21 * sizeof(char));
 	
+	fp = fopen(SUBOR, "r");
 	if (fp == NULL)
 	{
 		printf("Subor sa nepodarilo otvorit.\n");
@@ -117,7 +141,9 @@ int sum(void)
 	while ((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n", meno_priezvisko, &pohlavie, &rok, znacka, 
 										&casy[0], &casy[1], &casy[2], &casy[3], &casy[4])) != EOF)
 	{
-		krstneMenoPriezvisko(meno_priezvisko, krstne_meno, priezvisko);		
+		krstneMenoPriezvisko(meno_priezvisko, krstne_meno, priezvisko);
+		
+			
 		printf("%s %s, nar. %d, ", krstne_meno, priezvisko, rok);
 		printf("%s, Automobil: %s\n", pohlavie(pohlavie), znacka);
 		printf("Casy okruhov: ");
