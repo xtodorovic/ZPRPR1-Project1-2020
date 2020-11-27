@@ -429,6 +429,12 @@ int gender(void)
 		printf("Subor sa nepodarilo zatvorit.");
 		return 0;
 	}
+	free(casy);
+	free(meno_priezvisko);
+	free(priezvisko);
+	free(krstne_meno);
+	free(znacka);
+	free(jazdec);
 }
 
 int brand(void)
