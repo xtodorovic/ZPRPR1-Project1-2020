@@ -142,7 +142,7 @@ int sum(void)
 										&casy[0], &casy[1], &casy[2], &casy[3], &casy[4])) != EOF)
 	{
 		krstneMenoPriezvisko(meno_priezvisko, krstne_meno, priezvisko);
-		if(krstne_meno != NULL && priezvisko != NULL && kontrolaZnackeAuta(znacka) != 0)
+		if(krstne_meno != NULL && priezvisko != NULL && kontrolaZnackeAuta(znacka) != 0 && casy[4] != 0) 
 		{
 			printf("%s %s, nar. %d, ", krstne_meno, priezvisko, rok);
 			printf("%s, Automobil: %s\n", pohlavie(pohlavie), znacka);
@@ -158,6 +158,11 @@ int sum(void)
 					printf("%.3f;", casy[i]);
 				}
 			}
+		}
+		else
+		{
+			printf("CHYBA: Text v subore nie je spravne napisany.\n")
+			break;
 		}
 	}
 	
