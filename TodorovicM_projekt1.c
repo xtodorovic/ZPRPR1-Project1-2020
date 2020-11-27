@@ -30,6 +30,7 @@ float najlepsieKolo(float *casy);
 float najhorsieKolo(float *casy);
 float priemerneKolo(float *casy);
 
+int kontrolaUdajov(char* krstne_meno, char* priezvisko, char pohlavie, int rok, char* znacka, float *casy);
 int kontrolaZnackeAuta(char *znacka);
 
 int main()
@@ -145,12 +146,13 @@ int sum(void)
 	znacka = (char *)malloc(21 * sizeof(char));
 	
 	fp = fopen(SUBOR, "r");
-	if (fp == NULL)
-	{
-		printf("Subor sa nepodarilo otvorit.\n");
-		return 0;
-	}
+		if (fp == NULL)
+		{
+			printf("Subor sa nepodarilo otvorit.\n");
+			return 0;
+		}
 	
+	printf("\tFunkcia Summary: \n");
 	while ((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n", meno_priezvisko, &pohlavie, &rok, znacka, 
 										&casy[0], &casy[1], &casy[2], &casy[3], &casy[4])) != EOF)
 	{
@@ -181,12 +183,13 @@ int sum(void)
 			break;
 		}
 	}
+	printf("\tFunkcia Summary uspesne ukoncena. \n");
 	
-	if (fclose(fp) == EOF)
-	{
-		printf("Subor sa nepodarilo zatvorit.");
-		return 0;
-	}
+		if (fclose(fp) == EOF)
+		{
+			printf("Subor sa nepodarilo zatvorit.");
+			return 0;
+		}
 	free(casy);
 	free(meno_priezvisko);
 	free(priezvisko);
