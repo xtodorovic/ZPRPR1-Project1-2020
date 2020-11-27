@@ -142,20 +142,21 @@ int sum(void)
 										&casy[0], &casy[1], &casy[2], &casy[3], &casy[4])) != EOF)
 	{
 		krstneMenoPriezvisko(meno_priezvisko, krstne_meno, priezvisko);
-		
-			
-		printf("%s %s, nar. %d, ", krstne_meno, priezvisko, rok);
-		printf("%s, Automobil: %s\n", pohlavie(pohlavie), znacka);
-		printf("Casy okruhov: ");
-		for(i=0; i<5; i++)
+		if(krstne_meno != NULL && priezvisko != NULL && kontrolaZnackeAuta(znacka) != 0)
 		{
-			if(i == 4)
+			printf("%s %s, nar. %d, ", krstne_meno, priezvisko, rok);
+			printf("%s, Automobil: %s\n", pohlavie(pohlavie), znacka);
+			printf("Casy okruhov: ");
+			for(i=0; i<5; i++)
 			{
-				printf("%.3f\n", casy[i]);
-			}
-			else
-			{
-				printf("%.3f;", casy[i]);
+				if(i == 4)
+				{
+					printf("%.3f\n", casy[i]);
+				}
+				else
+				{
+					printf("%.3f;", casy[i]);
+				}
 			}
 		}
 	}
