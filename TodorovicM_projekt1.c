@@ -295,11 +295,9 @@ int lap(void)
 {
 	FILE *fp;
 	float *casy = NULL, najlepsi_cas = 1000;
-	char *meno_priezvisko = NULL, *krstne_meno = NULL, *priezvisko = NULL;
-	char *znacka = NULL, pohlavie;
+	char *meno_priezvisko = NULL, *krstne_meno = NULL, *priezvisko = NULL, *znacka = NULL, *jazdec = NULL;
+	char pohlavie;
 	int rok, i, kolo, riadok=0;
-	
-	char *jazdec = NULL;
 	
 	casy = (float *)calloc(MAX_RACE_ROUNDS, sizeof(float));
 	meno_priezvisko = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
@@ -362,16 +360,18 @@ int lap(void)
 
 int gender(void)
 {
+	FILE *fp;
+	float *casy = NULL, najlepsi_cas = 1000;
+	char *meno_priezvisko = NULL, *krstne_meno = NULL, *priezvisko = NULL, *znacka = NULL, *jazdec = NULL;
+	char pohlavie, pohlavie_najst;
+	int rok, i, kolo, riadok=0;
 
-	float casy[5];
-	float najlepsie_kolo=100;
-	char meno_priezvisko[50];
-	char jazdec[50];
-	char genderstr[5];
-	char gender;
-	int kolo;
-	
-	int i;
+	casy = (float *)calloc(MAX_RACE_ROUNDS, sizeof(float));
+	meno_priezvisko = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
+	krstne_meno = (char *)malloc(NAME * sizeof(char));
+	priezvisko = (char *)malloc(SURNAME * sizeof(char));
+	znacka = (char *)malloc(CAR_BRAND * sizeof(char));
+	jazdec = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
 	
 	fp = fopen("tabulka.csv", "r");
 	
@@ -380,33 +380,48 @@ int gender(void)
 		printf("Subor sa nepodarilo otvorit.\n");
 		return 0;
 	}
-	printf("Funkcia Gender: Vlozte pohlavie jazdca, \"m\" alebo \"f\":\n");
-	scanf(" %c", &gender);
+	printf("\tFunkcia Gender:\nVlozte pohlavie jazdca, \'m\' alebo \'f\':\n");
+	scanf(" %c", &pohlavie_najst);
 	
-	if(gender == 'm' || gender == 'f')
+	if(pohlavie_najst == 'm' || pohlavie_najst == 'f')
 	{
-		while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, &znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
+		while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
 		{
-			if(gender == pohlavie)
+			riadok++;
+			krstneMenoPriezvisko(meno_priezvisko, krstne_meno, priezvisko);
+
+			if(kontrolaUdajov(krstne_meno, priezvisko, pohlavie, rok, znacka, casy) != 0) 
 			{
-				for(i=0 ;i<5; i++)
+				if(pohlavie_najst == pohlavie)
 				{
-					if(najlepsie_kolo >= casy[i])
+					for(i=0 ;i<5; i++)
 					{
-						najlepsie_kolo = casy[i];
-						kolo = i+1;
-						strcpy(jazdec, meno_priezvisko);
-					}
-				}	
+						if(najlepsi_cas >= casy[i])
+						{
+							najlepsi_cas = casy[i];
+							kolo = i+1;
+							strcpy(jazdec, meno_priezvisko);
+						}
+					}	
+				}
+			}
+			else
+			{
+				printf("\tCHYBA: Jazdec cislo %d nie je spravne zapisany v subore.\n", riadok);
+				break;
 			}
 		}
-		printf("Najlepsie kolo: %.3f\n",najlepsie_kolo);
-		printf("Jazdec: %s\n", jazdec);
-		printf("Cislo kola: %d\n", kolo);
+		if(jazdec != NULL && najlepsi_cas != 1000)
+		{
+			printf("Najlepsie kolo: %.3f\n",najlepsi_cas);
+			printf("Jazdec: %s\n", jazdec);
+			printf("Cislo kola: %d\n", kolo);
+			printf("--------------------------------------------------------\n");
+		}
 	}
 	else
 	{
-		printf("Funkcia Gender: Nespravny vstup! Povolene hodnoty su \"m\" alebo \"f\".\n");
+		printf("Funkcia Gender: Nespravny vstup! Povolene pismena su \'m\' alebo \'f\'.\n");
 	}
 	
 	if(fclose(fp) == EOF)
@@ -443,7 +458,7 @@ int brand(void)
 	{
 		rewind(fp);	
 		strcpy(znacka_h, znacky+i*10);
-		while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, &znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
+		while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
 		{
 			if(strcmp(znacka_h, znacka) == 0)
 			{	
@@ -508,7 +523,7 @@ int year(void)
 	
 	if(vstup_rok >= 1000)
 	{
-		while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, &znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
+		while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
 		{
 			if( rok <= vstup_rok)
 			{
@@ -623,7 +638,7 @@ int under(void)
 	printf("Funkcia Under: Vypis hodnot pod vlozenou hodnotou \nZadajte hodnotu: ");
 	scanf("%f", &realne_cislo);
 
-	while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, &znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
+	while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
 	{
 		kola = 0;
 		printf("%s - ", meno_priezvisko);
