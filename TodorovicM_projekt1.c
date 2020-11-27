@@ -7,6 +7,8 @@
 #define NAME_AND_SURNAME 101
 #define NAME 61
 #define SURNAME 41
+#define MIN_ROK 1800
+#define MAX_ROK 2020
 #define CAR_BRAND 11
 #define MAX_CAR_BRANDS 4
 #define MAX_RACE_ROUNDS 5
@@ -127,7 +129,7 @@ int kontrolaZnackeAuta(char *znacka)
 
 int kontrolaUdajov(char* krstne_meno, char* priezvisko, char pohlavie, int rok, char* znacka, float *casy)
 {
-	if(krstne_meno != NULL && priezvisko != NULL && rok > 1800 && (pohlavie == 'm' || pohlavie == 'f') && 
+	if(krstne_meno != NULL && priezvisko != NULL && rok > MIN_ROK && rok <= 2020 && (pohlavie == 'm' || pohlavie == 'f') && 
 		znacka != NULL && kontrolaZnackeAuta(znacka) != 0 && casy != NULL  )
 		{
 			return 1;
@@ -521,15 +523,19 @@ int brand(void)
 
 int year(void)
 {
+	FILE *fp;
+	float *casy = NULL, najlepsi_cas = 1000;
+	char *meno_priezvisko = NULL, *krstne_meno = NULL, *priezvisko = NULL, *znacka = NULL, *jazdec = NULL;
+	char pohlavie;
+	int rok, i, kolo, riadok=0, najden_jazdec = 0, vstup_rok = 0, rok_n;
 
-	float casy[5];
-	float najlepsie_kolo=100;
-	char meno_priezvisko[50];
-	char jazdec[50];
-	int kolo, vstup_rok = 0;
-	int najden_jazdec =0;
-	int rok_n;
-	int i;
+	casy = (float *)calloc(MAX_RACE_ROUNDS, sizeof(float));
+	meno_priezvisko = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
+	krstne_meno = (char *)malloc(NAME * sizeof(char));
+	priezvisko = (char *)malloc(SURNAME * sizeof(char));
+	znacka = (char *)malloc(CAR_BRAND * sizeof(char));
+	jazdec = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
+
 	
 	fp = fopen("tabulka.csv", "r");
 	
@@ -538,34 +544,46 @@ int year(void)
 		printf("Subor sa nepodarilo otvorit.\n");
 		return 0;
 	}
-	printf("Funkcia Year: Zadajte rok: ");
+	printf("\tFunkcia Year:\nZadajte rok: ");
 	scanf("%d", &vstup_rok);
 	
-	if(vstup_rok >= 1000)
+	if(vstup_rok >= MIN_ROK)
 	{
 		while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
 		{
-			if( rok <= vstup_rok)
+			riadok++;
+			krstneMenoPriezvisko(meno_priezvisko, krstne_meno, priezvisko);
+
+			if(kontrolaUdajov(krstne_meno, priezvisko, pohlavie, rok, znacka, casy) != 0) 
 			{
-				for(i=0 ;i<MAX_RACE_ROUNDS; i++)
+				if( rok <= vstup_rok)
 				{
-					if(najlepsie_kolo >= casy[i])
+					for(i=0 ;i<MAX_RACE_ROUNDS; i++)
 					{
-						najlepsie_kolo = casy[i];
-						kolo = i+1;
-						rok_n = rok;
-						strcpy(jazdec, meno_priezvisko);
+						if(najlepsi_cas >= casy[i])
+						{
+							najlepsi_cas = casy[i];
+							kolo = i+1;
+							rok_n = rok;
+							strcpy(jazdec, meno_priezvisko);
+						}
 					}
+					najden_jazdec = 1;	
 				}
-				najden_jazdec = 1;	
+			}
+			else
+			{
+				printf("\tCHYBA: Jazdec cislo %d nie je spravne zapisany v subore.\n", riadok);
+				break;
 			}
 		}
 		if(najden_jazdec)
 		{
 			printf("%s\n", jazdec);
 			printf("nar. %d\n", rok_n);
-			printf("Najlepsie kolo: %.3f\n",najlepsie_kolo);
-			printf("Cislo kola: %d\n", kolo);	
+			printf("Najlepsie kolo: %.3f\n",najlepsi_cas);
+			printf("Cislo kola: %d\n", kolo);
+			printf("--------------------------------------------------------\n");	
 		}
 		else
 		{
@@ -574,7 +592,10 @@ int year(void)
 	}
 	else
 	{
-		printf("Funkcia Year: Nespravny vstup! Vstup musi byt vo formate \"YYYY\".\n");
+		if(vstup_rok < 1000)
+		{
+			printf("Funkcia Year: Nespravny vstup! Vstup musi byt vo formate \"YYYY\".\n");
+		}
 	}
 	
 	if(fclose(fp) == EOF)
@@ -582,6 +603,12 @@ int year(void)
 		printf("Subor sa nepodarilo zatvorit.");
 		return 0;
 	}
+	free(casy);
+	free(meno_priezvisko);
+	free(priezvisko);
+	free(krstne_meno);
+	free(znacka);
+	free(jazdec);
 }
 
 int average(void)
