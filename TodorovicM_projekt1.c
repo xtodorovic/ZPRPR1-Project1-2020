@@ -1,10 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+
 #define SUBOR "tabulka.csv"
-#define pohlavie(x)  ( x == 'm' ? "muz" : "zena")
-
-
+#define NAME_AND_SURNAME 101
+#define NAME 61
+#define SURNAME 41
+#define CAR_BRAND 11
+#define MAX_CAR_BRANDS 4
+#define MAX_RACE_ROUNDS 5
+#define check_gender(x)  ( x == 'm' ? "muz" : "zena")
+ 
 FILE *fp;
 int rok;
 char pohlavie;
@@ -121,7 +128,7 @@ int kontrolaZnackeAuta(char *znacka)
 int kontrolaUdajov(char* krstne_meno, char* priezvisko, char pohlavie, int rok, char* znacka, float *casy)
 {
 	if(krstne_meno != NULL && priezvisko != NULL && rok > 1800 && (pohlavie == 'm' || pohlavie == 'f') && 
-										znacka != NULL && kontrolaZnackeAuta(znacka) != 0 && casy != NULL  )
+		znacka != NULL && kontrolaZnackeAuta(znacka) != 0 && casy != NULL  )
 		{
 			return 1;
 		}
@@ -139,11 +146,11 @@ int sum(void)
 	char *znacka = NULL, pohlavie;
 	int rok, i, riadok=0;
 	
-	casy = (float *)calloc(5, sizeof(float));
-	meno_priezvisko = (char *)malloc(101 * sizeof(char));
-	krstne_meno = (char *)malloc(51 * sizeof(char));
-	priezvisko = (char *)malloc(51 * sizeof(char));
-	znacka = (char *)malloc(21 * sizeof(char));
+	casy = (float *)calloc(MAX_RACE_ROUNDS, sizeof(float));
+	meno_priezvisko = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
+	krstne_meno = (char *)malloc(NAME * sizeof(char));
+	priezvisko = (char *)malloc(SURNAME * sizeof(char));
+	znacka = (char *)malloc(CAR_BRAND * sizeof(char));
 	
 	fp = fopen(SUBOR, "r");
 		if (fp == NULL)
@@ -152,44 +159,43 @@ int sum(void)
 			return 0;
 		}
 	
-	printf("\tFunkcia Summary: \n");
-	while ((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n", meno_priezvisko, &pohlavie, &rok, znacka, 
-										&casy[0], &casy[1], &casy[2], &casy[3], &casy[4])) != EOF)
-	{
-		riadok++;
-		
-		krstneMenoPriezvisko(meno_priezvisko, krstne_meno, priezvisko);
-		
-		if(kontrolaUdajov(krstne_meno, priezvisko, pohlavie, rok, znacka, casy) != 0) 
+		printf("\tFunkcia Summary: \n");
+		while ((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie, &rok, znacka, &casy[0], &casy[1], &casy[2], &casy[3], &casy[4])) != EOF)
 		{
-			printf("%s %s, nar. %d, ", krstne_meno, priezvisko, rok);
-			printf("%s, Automobil: %s\n", pohlavie(pohlavie), znacka);
-			printf("Casy okruhov: ");
-			for(i=0; i<5; i++)
+			riadok++;
+			
+			krstneMenoPriezvisko(meno_priezvisko, krstne_meno, priezvisko);
+			
+			if(kontrolaUdajov(krstne_meno, priezvisko, pohlavie, rok, znacka, casy) != 0) 
 			{
-				if(i == 4)
+				printf("%s %s, nar. %d, ", krstne_meno, priezvisko, rok);
+				printf("%s, Automobil: %s\n", check_gender(pohlavie), znacka);
+				printf("Casy okruhov: ");
+				for(i=0; i<MAX_RACE_ROUNDS; i++)
 				{
-					printf("%.3f\n", casy[i]);
-				}
-				else
-				{
-					printf("%.3f;", casy[i]);
+					if(i == MAX_RACE_ROUNDS-1)
+					{
+						printf("%.3f\n", casy[i]);
+					}
+					else
+					{
+						printf("%.3f;", casy[i]);
+					}
 				}
 			}
+			else
+			{
+				printf("\tCHYBA: Jazdec cislo %d nie je spravne zapisany v subore.\n", riadok);
+				break;
+			}
 		}
-		else
-		{
-			printf("\tCHYBA: Jazdec %d nie je spravne zapisany v subore.\n", riadok);
-			break;
-		}
-	}
-	printf("\tFunkcia Summary uspesne ukoncena. \n");
+	printf("--------------------------------------------------------\n");
 	
-		if (fclose(fp) == EOF)
-		{
-			printf("Subor sa nepodarilo zatvorit.");
-			return 0;
-		}
+	if (fclose(fp) == EOF)
+	{
+		printf("Subor sa nepodarilo zatvorit.");
+		return 0;
+	}
 	free(casy);
 	free(meno_priezvisko);
 	free(priezvisko);
@@ -200,10 +206,21 @@ int sum(void)
 
 int driver(void)
 {
-	char priezvisko_najst[50];
+	FILE *fp;
+	float *casy = NULL;
+	char *meno_priezvisko = NULL, *krstne_meno = NULL, *priezvisko = NULL;
+	char *znacka = NULL, pohlavie;
+	int rok, i, riadok=0;
+	
+	char *priezvisko_najst = NULL;
 	int jazdec_najden = 0;
-	float casy[5];
-	int i;
+	
+	casy = (float *)calloc(MAX_RACE_ROUNDS, sizeof(float));
+	meno_priezvisko = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
+	krstne_meno = (char *)malloc(NAME * sizeof(char));
+	priezvisko = (char *)malloc(SURNAME * sizeof(char));
+	znacka = (char *)malloc(CAR_BRAND * sizeof(char));
+	priezvisko_najst = (char *)malloc(SURNAME * sizeof(char));
 	
 	fp = fopen("tabulka.csv", "r");
 	
@@ -212,39 +229,53 @@ int driver(void)
 		printf("Subor sa nepodarilo otvorit.\n");
 		return 0;
 	}
-	printf("Funkcia Driver: Vlozte priezvisko jazdca ktoreho hladate: ");
+	printf("\tFunkcia Driver: \nVlozte priezvisko jazdca ktoreho hladate: ");
 	scanf("%s", priezvisko_najst);
 	
-	while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
+	while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, znacka, &casy[0], &casy[1], &casy[2], &casy[3], &casy[4])) != EOF)
 	{
+		riadok++;
 		krstneMenoPriezvisko(meno_priezvisko, krstne_meno, priezvisko);
-		if(strcmp(priezvisko, priezvisko_najst) == 0)
+		
+		if(kontrolaUdajov(krstne_meno, priezvisko, pohlavie, rok, znacka, casy) != 0) 
 		{
-			jazdec_najden = 1;
-			printf("%s %s\nnar. %d, ", krstne_meno, priezvisko, rok);
-			printf("%s\nAutomobil: %s\n", (pohlavie == 'm' ? "muz" : "zena"), znacka);
-			printf("\nCasy okruhov: ");
-			for(i=0; i<5; i++)
+			if(strcmp(priezvisko, priezvisko_najst) == 0)
 			{
-				if(i == 4)
+				printf("\n%s %s\nnar. %d, ", krstne_meno, priezvisko, rok);
+				printf("%s\nAutomobil: %s\n", check_gender(pohlavie), znacka);
+				printf("\nCasy okruhov: ");
+				for(i=0; i<MAX_RACE_ROUNDS; i++)
 				{
-					printf("%.3f", casy[i]);
+					if(i == MAX_RACE_ROUNDS-1)
+					{
+						printf("%.3f\n", casy[i]);
+					}
+					else
+					{
+						printf("%.3f;", casy[i]);
+					}
 				}
-				else
-				{
-					printf("%.3f;", casy[i]);
-				}
+				printf("\n\n");
+				printf("Najlepsie kolo: %.3f\n",najlepsieKolo(casy));
+				printf("Najhorsie kolo: %.3f\n",najhorsieKolo(casy));
+				printf("Priemerne kolo: %.3f\n",priemerneKolo(casy));
+				jazdec_najden = 1;
 			}
-			printf("\n\n");
-			printf("Najlepsie kolo: %.3f\n",najlepsieKolo(casy));
-			printf("Najhorsie kolo: %.3f\n",najhorsieKolo(casy));
-			printf("Priemerne kolo: %.3f\n",priemerneKolo(casy));
+		}
+		else
+		{
+			printf("\tCHYBA: Jazdec cislo %d nie je spravne zapisany v subore.\n", riadok);
+			break;
 		}
 	}
 
 	if(jazdec_najden == 0)
 	{
-		printf("Jazdec s priezviskom \"%s\" nebol najden v tabulke.\n", priezvisko_najst);
+		printf("Jazdec s priezviskom \"%s\" nebol najden v subore.\n", priezvisko_najst);
+	}
+	else
+	{
+		printf("--------------------------------------------------------\n");
 	}
 	
 	if(fclose(fp) == EOF)
@@ -252,6 +283,12 @@ int driver(void)
 		printf("Subor sa nepodarilo zatvorit.");
 		return 0;
 	}
+	free(casy);
+	free(meno_priezvisko);
+	free(priezvisko);
+	free(krstne_meno);
+	free(znacka);
+	free(priezvisko_najst);
 }
 
 int lap(void)
