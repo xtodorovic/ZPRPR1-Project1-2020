@@ -293,15 +293,21 @@ int driver(void)
 
 int lap(void)
 {
+	FILE *fp;
+	float *casy = NULL, najlepsi_cas = 1000;
+	char *meno_priezvisko = NULL, *krstne_meno = NULL, *priezvisko = NULL;
+	char *znacka = NULL, pohlavie;
+	int rok, i, kolo, riadok=0;
+	
+	char *jazdec = NULL;
+	
+	casy = (float *)calloc(MAX_RACE_ROUNDS, sizeof(float));
+	meno_priezvisko = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
+	krstne_meno = (char *)malloc(NAME * sizeof(char));
+	priezvisko = (char *)malloc(SURNAME * sizeof(char));
+	znacka = (char *)malloc(CAR_BRAND * sizeof(char));
+	jazdec = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
 
-	float casy[5];
-	float najlepsie_kolo=100;
-	char meno_priezvisko[50];
-	char jazdec[50];
-	int kolo;
-	
-	int i;
-	
 	fp = fopen("tabulka.csv", "r");
 	
 	if(fp == NULL)
@@ -309,30 +315,49 @@ int lap(void)
 		printf("Subor sa nepodarilo otvorit.\n");
 		return 0;
 	}
-	
-	
-	while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, &znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
+	printf("\tFunkcia Lap:\n");
+	while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
 	{
-		for(i=0 ;i<5; i++)
+		riadok++;
+		krstneMenoPriezvisko(meno_priezvisko, krstne_meno, priezvisko);
+		
+		if(kontrolaUdajov(krstne_meno, priezvisko, pohlavie, rok, znacka, casy) != 0) 
 		{
-			if(najlepsie_kolo >= casy[i])
+			for(i=0 ;i<MAX_RACE_ROUNDS; i++)
 			{
-				najlepsie_kolo = casy[i];
-				kolo = i+1;
-				strcpy(jazdec, meno_priezvisko);
+				if(najlepsi_cas >= casy[i])
+				{
+					najlepsi_cas = casy[i];
+					kolo = i+1;
+					strcpy(jazdec, meno_priezvisko);
+				}
 			}
 		}
+		else
+		{
+			printf("\tCHYBA: Jazdec cislo %d nie je spravne zapisany v subore.\n", riadok);
+			break;
+		}
 	}
-	printf("Funkcia Lap: \n");
-	printf("Najlepsie kolo: %.3f\n",najlepsie_kolo);
-	printf("Jazdec: %s\n", jazdec);
-	printf("Cislo kola: %d\n", kolo);
-	
+	if(jazdec != NULL && najlepsi_cas != 1000)
+	{
+		printf("Najlepsie kolo: %.3f\n",najlepsi_cas);
+		printf("Jazdec: %s\n", jazdec);
+		printf("Cislo kola: %d\n", kolo);
+		printf("--------------------------------------------------------\n");
+	}
+
 	if(fclose(fp) == EOF)
 	{
 		printf("Subor sa nepodarilo zatvorit.");
 		return 0;
 	}
+	free(casy);
+	free(meno_priezvisko);
+	free(priezvisko);
+	free(krstne_meno);
+	free(znacka);
+	free(jazdec);
 }
 
 int gender(void)
