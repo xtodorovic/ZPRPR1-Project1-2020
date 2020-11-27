@@ -394,7 +394,7 @@ int gender(void)
 			{
 				if(pohlavie_najst == pohlavie)
 				{
-					for(i=0 ;i<5; i++)
+					for(i=0 ;i<MAX_RACE_ROUNDS; i++)
 					{
 						if(najlepsi_cas >= casy[i])
 						{
@@ -439,19 +439,27 @@ int gender(void)
 
 int brand(void)
 {
-	float casy[5];
-	float najlepsie_kolo=100;
-	char meno_priezvisko[50];
-	char jazdec[50];
-	char* znacky;
-	char znacka_h[10];
-	int kolo, existuje = 0;
-	int i,j;
-	znacky =(char *)malloc(4 * 10 * sizeof(*znacky));
-	strcpy(znacky+0*10, "bugatti");
-	strcpy(znacky+1*10, "ferrari");
-	strcpy(znacky+2*10, "porsche");
-	strcpy(znacky+3*10, "honda");
+	FILE *fp;
+	float *casy = NULL, najlepsi_cas = 1000;
+	char *meno_priezvisko = NULL, *krstne_meno = NULL, *priezvisko = NULL, *znacka = NULL, *jazdec = NULL, *znacky, *znacka_compare;
+	char pohlavie, pohlavie_najst;
+	int rok, i, j, kolo, existuje = 0;
+	
+
+	casy = (float *)calloc(MAX_RACE_ROUNDS, sizeof(float));
+	meno_priezvisko = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
+	krstne_meno = (char *)malloc(NAME * sizeof(char));
+	priezvisko = (char *)malloc(SURNAME * sizeof(char));
+	znacka = (char *)malloc(CAR_BRAND * sizeof(char));
+	jazdec = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
+	znacky =(char *)malloc(MAX_CAR_BRANDS * CAR_BRAND * sizeof(*znacky));
+	znacka_compare = (char *)malloc(CAR_BRAND * sizeof(char));
+	
+	strcpy(znacky+0*CAR_BRAND, "bugatti");
+	strcpy(znacky+1*CAR_BRAND, "ferrari");
+	strcpy(znacky+2*CAR_BRAND, "porsche");
+	strcpy(znacky+3*CAR_BRAND, "honda");
+	
 	fp = fopen("tabulka.csv", "r");
 	
 	if(fp == NULL)
@@ -459,50 +467,56 @@ int brand(void)
 		printf("Subor sa nepodarilo otvorit.\n");
 		return 0;
 	}
-	printf("Funkcia Brand:\n");
-	for(i=0; i<4; i++)
+	printf("\tFunkcia Brand:\n");
+	for(i=0; i<MAX_CAR_BRANDS; i++)
 	{
 		rewind(fp);	
-		strcpy(znacka_h, znacky+i*10);
+		strcpy(znacka_compare, znacky+i*CAR_BRAND);
 		while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
 		{
-			if(strcmp(znacka_h, znacka) == 0)
+			if(strcmp(znacka_compare, znacka) == 0)
 			{	
-				for(j=0 ;j<5; j++)
+				for(j=0; j<MAX_RACE_ROUNDS; j++)
 				{
-					if(najlepsie_kolo >= casy[j])
+					if(najlepsi_cas >= casy[j])
 					{
-						najlepsie_kolo = casy[j];
+						najlepsi_cas = casy[j];
 						kolo = j+1;
 						strcpy(jazdec, meno_priezvisko);
 						existuje = 1;
 					}
 				}
-			}				
+			}
 		}
 		if(existuje)
 		{
-			printf("Znacka: %s\n", znacka_h);
-			printf("Najlepsie kolo: %.3f\n",najlepsie_kolo);
+			printf("Znacka: %s\n", znacka_compare);
+			printf("Najlepsie kolo: %.3f\n",najlepsi_cas);
 			printf("Jazdec: %s\n", jazdec);
 			printf("Cislo kola: %d\n\n", kolo);
 		}
 		else
 		{
-			printf("Znacka: %s\n", znacka_h);
+			printf("Znacka: %s\n", znacka_compare);
 			printf("Neexistuje jazdec v zozname.\n\n");
 		}
 		existuje = 0;
-		najlepsie_kolo=100;
-		kolo=0;
+		najlepsi_cas = 1000;
+		kolo = 0;
 	}
-	
-	
+	printf("--------------------------------------------------------\n");
 	if(fclose(fp) == EOF)
 	{
 		printf("Subor sa nepodarilo zatvorit.");
 		return 0;
 	}
+	free(casy);
+	free(meno_priezvisko);
+	free(priezvisko);
+	free(krstne_meno);
+	free(znacka);
+	free(znacky);
+	free(znacka_compare);
 }
 
 int year(void)
@@ -533,7 +547,7 @@ int year(void)
 		{
 			if( rok <= vstup_rok)
 			{
-				for(i=0 ;i<5; i++)
+				for(i=0 ;i<MAX_RACE_ROUNDS; i++)
 				{
 					if(najlepsie_kolo >= casy[i])
 					{
@@ -656,7 +670,7 @@ int under(void)
 				
 			}
 		}
-		if(kola > 1 && kola < 5)
+		if(kola > 1 && kola < MAX_RACE_ROUNDS)
 		{
 			printf("%d kola, ", kola);
 		}
@@ -675,7 +689,7 @@ int under(void)
 		
 		vypis_casov = kola;
 		kola = 1;
-		for(i=0; i<5 ;i++)
+		for(i=0; i<MAX_RACE_ROUNDS ;i++)
 		{
 			if(realne_cislo >= casy[i] )
 			{
