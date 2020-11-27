@@ -30,7 +30,7 @@ float najlepsieKolo(float *casy);
 float najhorsieKolo(float *casy);
 float priemerneKolo(float *casy);
 
-
+int kontrolaZnackeAuta(char *znacka);
 
 int main()
 {
@@ -117,13 +117,26 @@ int kontrolaZnackeAuta(char *znacka)
 	}
 }
 
+int kontrolaUdajov(char* krstne_meno, char* priezvisko, char pohlavie, int rok, char* znacka, float *casy)
+{
+	if(krstne_meno != NULL && priezvisko != NULL && rok != 0 && (pohlavie == 'm' || pohlavie == 'f') && 
+										znacka != NULL && kontrolaZnackeAuta(znacka) != 0 && casy != NULL  )
+		{
+			return 1;
+		}
+		else 
+		{
+			return 0;
+		}
+}
+
 int sum(void)
 {
 	FILE *fp;
 	float *casy = NULL;
 	char *meno_priezvisko = NULL, *krstne_meno = NULL, *priezvisko = NULL;
 	char *znacka = NULL, pohlavie;
-	int rok, i;
+	int rok, i, riadok=0;
 	
 	casy = (float *)calloc(5, sizeof(float));
 	meno_priezvisko = (char *)malloc(101 * sizeof(char));
@@ -141,8 +154,11 @@ int sum(void)
 	while ((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n", meno_priezvisko, &pohlavie, &rok, znacka, 
 										&casy[0], &casy[1], &casy[2], &casy[3], &casy[4])) != EOF)
 	{
+		riadok++;
+		
 		krstneMenoPriezvisko(meno_priezvisko, krstne_meno, priezvisko);
-		if(krstne_meno != NULL && priezvisko != NULL && kontrolaZnackeAuta(znacka) != 0 && casy[4] != 0) 
+		
+		if(kontrolaUdajov(krstne_meno, priezvisko, pohlavie, rok, znacka, casy) != 0) 
 		{
 			printf("%s %s, nar. %d, ", krstne_meno, priezvisko, rok);
 			printf("%s, Automobil: %s\n", pohlavie(pohlavie), znacka);
@@ -161,7 +177,7 @@ int sum(void)
 		}
 		else
 		{
-			printf("CHYBA: Text v subore nie je spravne napisany.\n")
+			printf("\tCHYBA: Jazdec %d nie je spravne zapisany v subore.\n", riadok);
 			break;
 		}
 	}
