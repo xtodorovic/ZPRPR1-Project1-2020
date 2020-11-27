@@ -129,7 +129,7 @@ int kontrolaZnackeAuta(char *znacka)
 
 int kontrolaUdajov(char* krstne_meno, char* priezvisko, char pohlavie, int rok, char* znacka, float *casy)
 {
-	if(krstne_meno != NULL && priezvisko != NULL && rok > MIN_ROK && rok <= 2020 && (pohlavie == 'm' || pohlavie == 'f') && 
+	if(krstne_meno != NULL && priezvisko != NULL && rok > MIN_ROK && rok <= MAX_ROK && (pohlavie == 'm' || pohlavie == 'f') && 
 		znacka != NULL && kontrolaZnackeAuta(znacka) != 0 && casy != NULL  )
 		{
 			return 1;
@@ -224,7 +224,7 @@ int driver(void)
 	znacka = (char *)malloc(CAR_BRAND * sizeof(char));
 	priezvisko_najst = (char *)malloc(SURNAME * sizeof(char));
 	
-	fp = fopen("tabulka.csv", "r");
+	fp = fopen(SUBOR, "r");
 	
 	if(fp == NULL)
 	{
@@ -308,7 +308,7 @@ int lap(void)
 	znacka = (char *)malloc(CAR_BRAND * sizeof(char));
 	jazdec = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
 
-	fp = fopen("tabulka.csv", "r");
+	fp = fopen(SUBOR, "r");
 	
 	if(fp == NULL)
 	{
@@ -375,7 +375,7 @@ int gender(void)
 	znacka = (char *)malloc(CAR_BRAND * sizeof(char));
 	jazdec = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
 	
-	fp = fopen("tabulka.csv", "r");
+	fp = fopen(SUBOR, "r");
 	
 	if(fp == NULL)
 	{
@@ -462,7 +462,7 @@ int brand(void)
 	strcpy(znacky+2*CAR_BRAND, "porsche");
 	strcpy(znacky+3*CAR_BRAND, "honda");
 	
-	fp = fopen("tabulka.csv", "r");
+	fp = fopen(SUBOR, "r");
 	
 	if(fp == NULL)
 	{
@@ -536,7 +536,7 @@ int year(void)
 	znacka = (char *)malloc(CAR_BRAND * sizeof(char));
 	jazdec = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
 	
-	fp = fopen("tabulka.csv", "r");
+	fp = fopen(SUBOR, "r");
 	
 	if(fp == NULL)
 	{
@@ -616,7 +616,7 @@ int average(void)
 	float *casy = NULL, priemer_jazdca = 0, najlepsie_priemerne = 1000;
 	char *meno_priezvisko = NULL, *krstne_meno = NULL, *priezvisko = NULL, *znacka = NULL, *jazdec = NULL;
 	char pohlavie;
-	int rok, kolo, pocet_jazdcov=0, riadok=0;
+	int rok, kolo, riadok=0;
 
 	casy = (float *)calloc(MAX_RACE_ROUNDS, sizeof(float));
 	meno_priezvisko = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
@@ -625,7 +625,7 @@ int average(void)
 	znacka = (char *)malloc(CAR_BRAND * sizeof(char));
 	jazdec = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
 	
-	fp = fopen("tabulka.csv", "r");
+	fp = fopen(SUBOR, "r");
 	
 	if(fp == NULL)
 	{
@@ -664,12 +664,12 @@ int average(void)
 		printf("--------------------------------------------------------\n");
 	}
 	
-	
 	if(fclose(fp) == EOF)
 	{
 		printf("Subor sa nepodarilo zatvorit.");
 		return 0;
 	}
+	
 	free(casy);
 	free(meno_priezvisko);
 	free(priezvisko);
@@ -690,7 +690,7 @@ int under(void)
 	int pocet_jazdcov=0;
 	int i;
 	
-	fp = fopen("tabulka.csv", "r");
+	fp = fopen(SUBOR, "r");
 	
 	if(fp == NULL)
 	{
@@ -702,9 +702,10 @@ int under(void)
 
 	while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
 	{
+		
 		kola = 0;
 		printf("%s - ", meno_priezvisko);
-		for(i=0; i<5 ;i++)
+		for(i=0; i<MAX_RACE_ROUNDS; i++)
 		{
 			if(realne_cislo >= casy[i])
 			{
@@ -767,7 +768,7 @@ int change(void)
 	float cas_zmena;
 	float casy[5];
 	
-	fp = fopen("tabulka.csv", "r");
+	fp = fopen(SUBOR, "r");
 	fp_tmp = fopen("temporary.tmp", "w");
 	
 	if(fp == NULL)
@@ -819,15 +820,15 @@ int change(void)
 		printf("Subor sa nepodarilo zatvorit.");
 		return 0;
 	}
-	remove("tabulka.csv");
-	rename("temporary.tmp","tabulka.csv");
+	remove(SUBOR);
+	rename("temporary.tmp",SUBOR);
 	remove("temporary.tmp");
 	sum();
 }
 
 int newdriver(void)
 {
-	fp = fopen("tabulka.csv", "a+");
+	fp = fopen(SUBOR, "a+");
 	int new_rok;
 	char new_pohlavie;
 	char new_meno[20], new_priezvisko[20], new_znacka[20];
@@ -877,7 +878,7 @@ int rmdriver(void)
 	int jazdec_najden = 0;
 	long int pozicia;
 	
-	fp = fopen("tabulka.csv", "r");
+	fp = fopen(SUBOR, "r");
 	fp_tmp = fopen("temporary.tmp", "w");
 	
 	if(fp == NULL)
@@ -914,8 +915,8 @@ int rmdriver(void)
 		printf("Subor sa nepodarilo zatvorit.");
 		return 0;
 	}
-	remove("tabulka.csv");
-	rename("temporary.tmp","tabulka.csv");
+	remove(SUBOR);
+	rename("temporary.tmp",SUBOR);
 	remove("temporary.tmp");
 }
 
