@@ -14,12 +14,6 @@
 #define MAX_CAR_BRANDS 4
 #define MAX_RACE_ROUNDS 5
 #define check_gender(x)  ( x == 'm' ? "muz" : "zena")
- 
-FILE *fp;
-int rok;
-char pohlavie;
-char meno_priezvisko[50], meno[50], znacka[20], krstne_meno[50], priezvisko[50];
-float casy;
 
 int sum(void);
 int driver(void);
