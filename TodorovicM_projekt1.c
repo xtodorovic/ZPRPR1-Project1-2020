@@ -4,6 +4,7 @@
 
 
 #define SUBOR "tabulka.csv"
+#define TEMPORARY "temporary.tmp"
 #define NAME_AND_SURNAME 101
 #define NAME 61
 #define SURNAME 41
@@ -90,8 +91,11 @@ int main()
 			case 'r':
 				rmdriver();
 				break;
+			case 'm':
+				moznosti();
+				break;
 			case 'x': 
-				printf("Koniec."); 
+				printf("Koniec programu.\nDovienia."); 
 				koniec = 0; 
 				break;
 			default: 
@@ -638,7 +642,7 @@ int average(void)
 		return 0;
 	}
 	
-	printf("\tFunkcia Average:\nVypis najlepsieho priemerneho kola: \n");
+	printf("\tFunkcia Average:\nVypis priemernych kol: \n");
 	
 	while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
 	{
@@ -706,7 +710,7 @@ int under(void)
 		printf("Subor sa nepodarilo otvorit.\n");
 		return 0;
 	}
-	printf("\tFunkcia Under: Vypis hodnot pod vlozenou hodnotou.\nZadajte hodnotu: ");
+	printf("\tFunkcia Under: Vypis kol pod vlozenou hodnotou.\nZadajte hodnotu: ");
 	scanf("%f", &realne_cislo);
 	
 	if(realne_cislo > 0)
@@ -927,8 +931,15 @@ int newdriver(void)
 			{
 				if(new_casy[i] == 0)
 				{
-					printf("Nezapisali ste %d cas.\nZapiste ho teraz: ", i+1);
+					printf("Nezapisali ste dobre %d cas.\nZapiste teraz: ", i+1);
 					scanf("%f", &new_casy[i]);
+					
+					if(new_casy[i] <= 0)
+					{
+						printf("Stale nie je dobre zapisany.\nZapiste este raz: ");
+						scanf("%f", &new_casy[i]);
+						i--;
+					}
 				}
 			}
 		}
@@ -972,14 +983,18 @@ int newdriver(void)
 
 int rmdriver(void)
 {
-	FILE *fp_tmp;
-	char priezvisko_zmazat[20];
-	char buffer[1000];
+	FILE *fp, *fp_tmp;
+	char *meno_priezvisko = NULL, *krstne_meno = NULL, *priezvisko = NULL, *buffer = NULL, *priezvisko_zmazat = NULL;
 	int jazdec_najden = 0;
-	long int pozicia;
-	
+
+	meno_priezvisko = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
+	krstne_meno = (char *)malloc(NAME * sizeof(char));
+	priezvisko = (char *)malloc(SURNAME * sizeof(char));
+	buffer = (char *)malloc(1000 * sizeof(char));
+	priezvisko_zmazat = (char *)malloc(SURNAME * sizeof(char));
+
 	fp = fopen(SUBOR, "r");
-	fp_tmp = fopen("temporary.tmp", "w");
+	fp_tmp = fopen(TEMPORARY, "w");
 	
 	if(fp == NULL)
 	{
@@ -987,37 +1002,52 @@ int rmdriver(void)
 		return 0;
 	}
 	
-	
+	printf("\tFunkcia Remove Driver:\n");
 	printf("Zadajte priezvisko jazdca ktoreho chcete odstranit z tabulke: ");
 	scanf("%s", priezvisko_zmazat);
 	
-	while((fscanf(fp, "%[^;]%s\n",meno_priezvisko, buffer)) != EOF)
+	if(priezvisko_zmazat != NULL)
 	{
-		krstneMenoPriezvisko(meno_priezvisko, krstne_meno, priezvisko);
-		if(strcmp(priezvisko, priezvisko_zmazat) != 0)
+		while((fscanf(fp, "%[^;]%s\n",meno_priezvisko, buffer)) != EOF)
 		{
-			fprintf(fp_tmp,"%s %s%s\n", krstne_meno, priezvisko, buffer);
+			krstneMenoPriezvisko(meno_priezvisko, krstne_meno, priezvisko);
+			if(strcmp(priezvisko, priezvisko_zmazat) != 0)
+			{
+				fprintf(fp_tmp,"%s %s%s\n", krstne_meno, priezvisko, buffer);
+			}
+			else
+			{
+				printf("Jazdec s menom \"%s %s\" bol vymazany.\n", krstne_meno, priezvisko);
+				functionEnd();
+				jazdec_najden++;
+			}	
 		}
-		else
-		{
-			printf("Jazdec s menom \"%s %s\" bol vymazany.\n", krstne_meno, priezvisko);
-			jazdec_najden = 1;
-		}	
 	}
-
+	else
+	{
+		printf("CHYBA! Zadajte priezvisko.\n");	
+	}
+	
 	if(jazdec_najden == 0)
 	{
 		printf("Jazdec s priezviskom \"%s\" nebol najden v tabulke.\n", priezvisko_zmazat);
 	}
-	fclose(fp_tmp);
-	if(fclose(fp) == EOF)
+	if(fclose(fp_tmp) == EOF)
+	{
+		printf("Subor sa nepodarilo zatvorit.");
+		return 0;
+	}
+	if(fclose(fp) == EOF )
 	{
 		printf("Subor sa nepodarilo zatvorit.");
 		return 0;
 	}
 	remove(SUBOR);
-	rename("temporary.tmp",SUBOR);
-	remove("temporary.tmp");
+	rename(TEMPORARY,SUBOR);
+	remove(TEMPORARY);
+	free(priezvisko_zmazat);
+	free(krstne_meno);
+	free(priezvisko);
 }
 
 void krstneMenoPriezvisko(char *meno_priezvisko, char *krstne_meno, char *priezvisko)
@@ -1114,6 +1144,7 @@ void moznosti(void)
 	printf("\tPrikaz \"c\" - Funkcia change(): Prepisanie hodnoty nejakeho kola\n");
 	printf("\tPrikaz \"n\" - Funkcia newdriver(): Pridanie noveho jazdca a zadanie hodnot\n");
 	printf("\tPrikaz \"r\" - Funkcia rmdriver(): Vymazanie jazdca\n");
+	printf("\tPrikaz \"m\" - Moznosti pre pouzivatela\n");
 	printf("\tPrikaz \"x\" - Ukonci program\n");
 	printf("<---------------------------------------------------------------------------------------------->\n");
 }
