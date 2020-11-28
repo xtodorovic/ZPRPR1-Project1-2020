@@ -785,20 +785,25 @@ int under(void)
 	free(znacka);
 	free(jazdec);
 }
-
 int change(void)
 {
-	FILE *fp_tmp;
-	char priezvisko_zmena[51];
+	FILE *fp, *fp_tmp;
 	
-	char buffer[1000];
-	int jazdec_najden = 0;
-	int kolo_zmena,i;
-	float cas_zmena;
-	float casy[5];
+	float *casy = NULL, cas_zmena;
+	char *meno_priezvisko = NULL, *krstne_meno = NULL, *priezvisko = NULL, *znacka = NULL, *buffer = NULL, *priezvisko_zmena = NULL;
+	char pohlavie;
+	int rok, kolo_zmena, i, jazdec_najden = 0, chyba = 1;
+	long int pozicia=0;
 	
-	fp = fopen(SUBOR, "r");
-	fp_tmp = fopen("temporary.tmp", "w");
+	casy = (float *)calloc(MAX_RACE_ROUNDS, sizeof(float));
+	meno_priezvisko = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
+	krstne_meno = (char *)malloc(NAME * sizeof(char));
+	priezvisko = (char *)malloc(SURNAME * sizeof(char));
+	znacka = (char *)malloc(CAR_BRAND * sizeof(char));
+	buffer = (char *)malloc(1000 * sizeof(char));
+	priezvisko_zmena = (char *)malloc(SURNAME * sizeof(char));
+	
+	fp = fopen(SUBOR, "r+");
 	
 	if(fp == NULL)
 	{
@@ -806,53 +811,78 @@ int change(void)
 		return 0;
 	}
 	
-	printf("Zadajte priezvisko jazdca: ");
+	printf("\tFunkcia Change:\n");
+	printf(">Zadajte priezvisko jazdca pre zmenu: ");
 	scanf("%s", priezvisko_zmena);
-	printf("Zadajte kolo: ");
-	scanf("%d", &kolo_zmena);
-	printf("Zadajte cas: ");
-	scanf("%f", &cas_zmena);
+
 	
-	while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
+	if(priezvisko_zmena != NULL)
 	{
-		krstneMenoPriezvisko(meno_priezvisko, krstne_meno, priezvisko);
-		if(strcmp(priezvisko, priezvisko_zmena) == 0)
+		while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
 		{
-			fprintf(fp_tmp, "%s %s;%c;%d;%s", krstne_meno, priezvisko, pohlavie ,rok, znacka);
-			for(i=0; i<5; i++)
+			krstneMenoPriezvisko(meno_priezvisko, krstne_meno, priezvisko);
+			if(strcmp(priezvisko, priezvisko_zmena) == 0)
 			{
-				if(i == (kolo_zmena-1))
+				jazdec_najden = 1;
+				printf("Nasli sme jazdca!\n>Zadajte kolo ktore chcete zmenit: ");
+				scanf("%d", &kolo_zmena);
+				if(kolo_zmena > 0 && kolo_zmena <= MAX_RACE_ROUNDS)
 				{
-					fprintf(fp_tmp, ";%.3f", cas_zmena);
+					printf(">Zadajte novi cas: ");
+					scanf("%f", &cas_zmena);
 				}
 				else
 				{
-					fprintf(fp_tmp, ";%.3f", casy[i]);
+					printf("CHYBA! Kolo na zmenu musi byt iba od 1 do 5.\n");
+					break;
 				}
-			}
-			fprintf(fp_tmp, "\n");
-			jazdec_najden = 1;
-		}
-		else
-		{
-			fprintf(fp_tmp, "%s %s;%c;%d;%s;%.3f;%.3f;%.3f;%.3f;%.3f\n", krstne_meno, priezvisko, pohlavie ,rok, znacka, casy[0], casy[1], casy[2], casy[3], casy[4]);
-		}	
+				if((cas_zmena > 10) && (cas_zmena < 100))
+				{
+					pozicia = ftell(fp);
+					pozicia -= (45 + strlen(meno_priezvisko) + strlen(znacka));
+					fseek(fp, pozicia, SEEK_SET);
+					fprintf(fp, "%s %s;%c;%d;%s", krstne_meno, priezvisko, pohlavie ,rok, znacka);
+					for(i=0; i<MAX_RACE_ROUNDS; i++)
+					{
+						if(i == (kolo_zmena-1))
+						{
+							fprintf(fp, ";%.3f", cas_zmena);
+						}
+						else
+						{
+							fprintf(fp, ";%.3f", casy[i]);
+						}
+					}
+					fprintf(fp, "\n");
+					chyba = 0;
+					break;
+				}
+				else
+				{
+					printf("CHYBA! Novy cas musi byt dvojciferne cislo.\n");
+
+				}
+			}	
+		}			
 	}
+	
 	if(jazdec_najden == 0)
 	{
 		printf("Jazdec s priezviskom \"%s\" nebol najden v tabulke.\n", priezvisko_zmena);
 	}
 	
-	fclose(fp_tmp);
+	
 	if(fclose(fp) == EOF)
 	{
 		printf("Subor sa nepodarilo zatvorit.");
 		return 0;
 	}
-	remove(SUBOR);
-	rename("temporary.tmp",SUBOR);
-	remove("temporary.tmp");
-	sum();
+	if(!chyba)
+	{
+		printf("Uspesne sa zmenili udaje!\n");
+		functionEnd();
+		sum();
+	}
 }
 
 int newdriver(void)
@@ -973,6 +1003,7 @@ int newdriver(void)
 	free(new_priezvisko);
 	free(new_meno);
 	free(new_znacka);
+	free(buffer);
 }
 
 int rmdriver(void)
