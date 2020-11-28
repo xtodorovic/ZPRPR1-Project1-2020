@@ -859,12 +859,21 @@ int change(void)
 
 int newdriver(void)
 {
+	FILE *fp;
+	char *meno_priezvisko = NULL, *new_meno = NULL, *new_priezvisko = NULL, *new_znacka = NULL, *buffer = NULL;
+	char *new_pohlavie = NULL;
+	float *new_casy = NULL;
+	int i, new_rok, zapis_jazdca = 1 ;
+
+	new_casy = (float *)calloc(MAX_RACE_ROUNDS, sizeof(float));
+	meno_priezvisko = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
+	new_meno = (char *)malloc(NAME * sizeof(char));
+	new_priezvisko = (char *)malloc(SURNAME * sizeof(char));
+	new_znacka = (char *)malloc(CAR_BRAND * sizeof(char));
+	new_pohlavie = (char *)malloc(2 * sizeof(char));
+	buffer = (char *)malloc(1000 * sizeof(char));
+	
 	fp = fopen(SUBOR, "a+");
-	int new_rok;
-	char new_pohlavie;
-	char new_meno[20], new_priezvisko[20], new_znacka[20];
-	float new_cas1, new_cas2, new_cas3, new_cas4, new_cas5;
-	char buffer[1000];
 	
 	if(fp == NULL)
 	{
@@ -872,25 +881,75 @@ int newdriver(void)
 		return 0;
 	}
 	
-	printf("Zadajte nasledne informacie...\nMeno a Priezvisko: ");
-	scanf("%s %s", new_meno, new_priezvisko);
-	printf("Rok narodenia: ");
-	scanf("%d", &new_rok);
-	printf("Pohlavie - 'm' alebo 'z': ");
-	scanf(" %c", &new_pohlavie);
-	printf("Znacku auta: ");
-	scanf("%s", new_znacka);
-	printf("Pet hodnot vo formate \"cas1;cas2;cas3;cas4;cas5\" : ");
-	scanf("%f;%f;%f;%f;%f", &new_cas1,&new_cas2,&new_cas3,&new_cas4,&new_cas5);
-	while(1)
+	
+	while(zapis_jazdca != 0)
 	{
-		fgets(buffer, 100, fp);
-		if(feof(fp))
+		printf("\tFunkcia New Driver:\nZadajte informacie pre noveho jazdca.\n>Meno a Priezvisko: ");
+		scanf(" %[^\n]", meno_priezvisko);
+		krstneMenoPriezvisko(meno_priezvisko, new_meno, new_priezvisko);
+
+		if(new_priezvisko[0] != '\0' && new_meno[0] != '\0')
 		{
-			fprintf(fp, "%s %s;%c;%d;%s;%.3f;%.3f;%.3f;%.3f;%.3f", new_meno, new_priezvisko, new_pohlavie, new_rok, new_znacka, new_cas1,new_cas2,new_cas3,new_cas4,new_cas5);
-			fprintf(fp, "\n");
+			printf(">Rok narodenia(YYYY): ");
+			scanf("%d", &new_rok);
+		}
+		else 
+		{   
+			printf("CHYBA! Musite spravne zapisat meno a priezvisko.\n");
 			break;
 		}
+		
+		if(new_rok < 1000 || new_rok > MAX_ROK)
+		{
+			printf("CHYBA! Rok musi byt vo formate YYYY a mensi ako 2021.\n"); 
+			break;
+		}
+		else
+		{
+			printf(">Pohlavie - 'm' alebo 'f': ");
+			scanf(" %s", new_pohlavie);
+		}
+		if(new_pohlavie[0] == 'm' || new_pohlavie[0] == 'f')
+		{
+			printf(">Znacku auta: ");
+			scanf("%s", new_znacka);
+		}
+		else
+		{
+			printf("CHYBA! Povolene pismena su \'m\' alebo \'f\'.");
+			break;
+		}
+		if(kontrolaZnackeAuta(new_znacka))
+		{
+			printf(">Pet hodnot vo formate\n\"cas1;cas2;cas3;cas4;cas5\" : ");
+			scanf("%f;%f;%f;%f;%f", &new_casy[0], &new_casy[1], &new_casy[2], &new_casy[3], &new_casy[4]);
+			for(i=0; i<MAX_RACE_ROUNDS; i++)
+			{
+				if(new_casy[i] == 0)
+				{
+					printf("Nezapisali ste %d cas.\nZapiste ho teraz: ", i+1);
+					scanf("%f", &new_casy[i]);
+				}
+			}
+		}
+		else
+		{
+			printf("CHYBA! Mozne znacky su: bugatti, ferrari, porsche a honda.");
+			break;
+		}
+		
+		while(1)
+		{
+			fgets(buffer, 1000, fp);
+			if(feof(fp))
+			{
+				fprintf(fp, "%s %s;%c;%d;%s;%.3f;%.3f;%.3f;%.3f;%.3f", new_meno, new_priezvisko, new_pohlavie[0], new_rok, new_znacka,
+																	 new_casy[0],new_casy[1],new_casy[2],new_casy[3],new_casy[4]);
+				fprintf(fp, "\n");
+				break;
+			}
+		}
+		zapis_jazdca--;	
 	}
 	
 	if(fclose(fp) == EOF)
@@ -898,7 +957,17 @@ int newdriver(void)
 		printf("Subor sa nepodarilo zatvorit.");
 		return 0;
 	}
-	sum();
+	
+	if(zapis_jazdca == 0)
+	{
+		sum();
+	}
+	
+	free(new_casy);
+	free(meno_priezvisko);
+	free(new_priezvisko);
+	free(new_meno);
+	free(new_znacka);
 }
 
 int rmdriver(void)
@@ -969,20 +1038,26 @@ void krstneMenoPriezvisko(char *meno_priezvisko, char *krstne_meno, char *priezv
 			break;
 		}
 	}
-	
-	for(i=0; i<n; i++)
+	if(j != 0)
 	{
-		krstne_meno[i] = '\0';
+		for(i=0; i<n; i++)
+		{
+			krstne_meno[i] = '\0';
+		}
+		for(i=0; i<j; i++)
+		{
+			krstne_meno[i] = meno_priezvisko[i];
+		}
+		
+		for(i=0; i<n-j; i++)
+		{
+			priezvisko[i] = meno_priezvisko[i+j+1];
+		}
 	}
-	
-	for(i=0; i<j; i++)
+	else
 	{
-		krstne_meno[i] = meno_priezvisko[i];
-	}
-	
-	for(i=0; i<n-j; i++)
-	{
-		priezvisko[i] = meno_priezvisko[i+j+1];
+		priezvisko[0] = '\0'; 
+		krstne_meno[0] = '\0';
 	}
 }
 
