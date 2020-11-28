@@ -114,8 +114,8 @@ int sum(void)
 {
 	FILE *fp;
 	float *casy = NULL;
-	char *meno_priezvisko = NULL, *krstne_meno = NULL, *priezvisko = NULL;
-	char *znacka = NULL, pohlavie;
+	char *meno_priezvisko = NULL, *krstne_meno = NULL, *priezvisko = NULL, *znacka = NULL;
+	char pohlavie;
 	int rok, i, riadok=0;
 	
 	casy = (float *)calloc(MAX_RACE_ROUNDS, sizeof(float));
@@ -175,17 +175,14 @@ int sum(void)
 	free(znacka);
 }
 
-
 int driver(void)
 {
 	FILE *fp;
 	float *casy = NULL;
-	char *meno_priezvisko = NULL, *krstne_meno = NULL, *priezvisko = NULL;
-	char *znacka = NULL, pohlavie;
-	int rok, i, riadok=0;
-	
-	char *priezvisko_najst = NULL;
-	int jazdec_najden = 0;
+	char *meno_priezvisko = NULL, *krstne_meno = NULL, *priezvisko = NULL, *znacka = NULL, *priezvisko_najst = NULL;
+	char pohlavie;
+	int rok, i, riadok=0, jazdec_najden = 0;
+
 	
 	casy = (float *)calloc(MAX_RACE_ROUNDS, sizeof(float));
 	meno_priezvisko = (char *)malloc(NAME_AND_SURNAME * sizeof(char));
@@ -414,7 +411,7 @@ int brand(void)
 	FILE *fp;
 	float *casy = NULL, najlepsi_cas = 1000;
 	char *meno_priezvisko = NULL, *krstne_meno = NULL, *priezvisko = NULL, *znacka = NULL, *jazdec = NULL, *znacky, *znacka_compare;
-	char pohlavie, pohlavie_najst;
+	char pohlavie;
 	int rok, i, j, kolo, existuje = 0;
 	
 
@@ -850,6 +847,13 @@ int change(void)
 		functionEnd();
 		sum();
 	}
+	free(priezvisko_zmena);
+	free(meno_priezvisko);
+	free(krstne_meno);
+	free(priezvisko);
+	free(casy);
+	free(znacka);
+	free(buffer);
 }
 
 int newdriver(void)
@@ -1038,8 +1042,10 @@ int rmdriver(void)
 	rename(TEMPORARY,SUBOR);
 	remove(TEMPORARY);
 	free(priezvisko_zmazat);
+	free(meno_priezvisko);
 	free(krstne_meno);
 	free(priezvisko);
+	free(buffer);
 }
 
 void krstneMenoPriezvisko(char *meno_priezvisko, char *krstne_meno, char *priezvisko)
