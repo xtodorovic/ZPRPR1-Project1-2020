@@ -2,7 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*
+	Autor: Miroslav Todorovic
+	Cviciaci: Igor Stupavský
+	Datum: 28.11.2020
+*/
 
+/////////////////////////////////////////////////////
 #define SUBOR "tabulka.csv"
 #define TEMPORARY "temporary.tmp"
 #define NAME_AND_SURNAME 101
@@ -14,7 +20,9 @@
 #define MAX_CAR_BRANDS 4
 #define MAX_RACE_ROUNDS 5
 #define check_gender(x)  ( x == 'm' ? "muz" : "zena")
+//////////////////////////////////////////////////////
 
+//DEKLARACIA VSETKYCH POUZITYCH FUNKCII 
 int sum(void);
 int driver(void);
 int lap(void);
@@ -37,6 +45,7 @@ float priemerneKolo(float *casy);
 
 int kontrolaUdajov(char* krstne_meno, char* priezvisko, char pohlavie, int rok, char* znacka, float *casy);
 int kontrolaZnackeAuta(char *znacka);
+///////////////////////////////////////
 
 int main()
 {
@@ -101,48 +110,6 @@ int main()
 	return 0;
 }
 
-void functionEnd(void)
-{
-	printf("------------------------------------------------------/\n");
-}
-
-int kontrolaZnackeAuta(char *znacka)
-{
-	if(strcmp(znacka, "bugatti") == 0)
-	{
-		return 1;
-	}
-	else if(strcmp(znacka, "porsche") == 0)
-	{
-		return 1;
-	}
-	else if(strcmp(znacka, "ferrari") == 0)
-	{
-		return 1;
-	}
-	else if(strcmp(znacka, "honda") == 0)
-	{
-		return 1;
-	}
-	else
-	{
-		return 0;
-	}
-}
-
-int kontrolaUdajov(char* krstne_meno, char* priezvisko, char pohlavie, int rok, char* znacka, float *casy)
-{
-	if(krstne_meno != NULL && priezvisko != NULL && rok > MIN_ROK && rok <= MAX_ROK && (pohlavie == 'm' || pohlavie == 'f') && 
-		znacka != NULL && kontrolaZnackeAuta(znacka) != 0 && casy != NULL  )
-		{
-			return 1;
-		}
-		else 
-		{
-			return 0;
-		}
-}
-
 int sum(void)
 {
 	FILE *fp;
@@ -164,7 +131,7 @@ int sum(void)
 			return 0;
 		}
 	
-		printf("\tFunkcia Summary: \n");
+		printf("\tFunkcia Summary: \n\n");
 		while ((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie, &rok, znacka, &casy[0], &casy[1], &casy[2], &casy[3], &casy[4])) != EOF)
 		{
 			riadok++;
@@ -234,7 +201,7 @@ int driver(void)
 		printf("Subor sa nepodarilo otvorit.\n");
 		return 0;
 	}
-	printf("\tFunkcia Driver: \nVlozte priezvisko jazdca ktoreho hladate: ");
+	printf("\tFunkcia Driver: \n>Zadajte priezvisko jazdca ktoreho hladate: ");
 	scanf("%s", priezvisko_najst);
 	
 	while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, znacka, &casy[0], &casy[1], &casy[2], &casy[3], &casy[4])) != EOF)
@@ -344,7 +311,7 @@ int lap(void)
 	}
 	if(jazdec != NULL && najlepsi_cas != 1000)
 	{
-		printf("Najlepsie kolo: %.3f\n",najlepsi_cas);
+		printf("\nNajlepsie kolo: %.3f\n",najlepsi_cas);
 		printf("Jazdec: %s\n", jazdec);
 		printf("Cislo kola: %d\n", kolo);
 		functionEnd();
@@ -385,7 +352,7 @@ int gender(void)
 		printf("Subor sa nepodarilo otvorit.\n");
 		return 0;
 	}
-	printf("\tFunkcia Gender:\nVlozte pohlavie jazdca, \'m\' alebo \'f\':\n");
+	printf("\tFunkcia Gender:\n>Vlozte pohlavie jazdca, \'m\' alebo \'f\': ");
 	scanf(" %c", &pohlavie_najst);
 	
 	if(pohlavie_najst == 'm' || pohlavie_najst == 'f')
@@ -418,7 +385,7 @@ int gender(void)
 		}
 		if(jazdec != NULL && najlepsi_cas != 1000)
 		{
-			printf("Najlepsie kolo: %.3f\n",najlepsi_cas);
+			printf("\nNajlepsie kolo: %.3f\n",najlepsi_cas);
 			printf("Jazdec: %s\n", jazdec);
 			printf("Cislo kola: %d\n", kolo);
 			functionEnd();
@@ -472,7 +439,7 @@ int brand(void)
 		printf("Subor sa nepodarilo otvorit.\n");
 		return 0;
 	}
-	printf("\tFunkcia Brand:\n");
+	printf("\tFunkcia Brand:\n\n");
 	for(i=0; i<MAX_CAR_BRANDS; i++)
 	{
 		rewind(fp);	
@@ -546,7 +513,7 @@ int year(void)
 		printf("Subor sa nepodarilo otvorit.\n");
 		return 0;
 	}
-	printf("\tFunkcia Year:\nZadajte rok: ");
+	printf("\tFunkcia Year:\n>Zadajte rok: ");
 	scanf("%d", &vstup_rok);
 	
 	if(vstup_rok >= MIN_ROK)
@@ -581,7 +548,7 @@ int year(void)
 		}
 		if(najden_jazdec)
 		{
-			printf("%s\n", jazdec);
+			printf("\n%s\n", jazdec);
 			printf("nar. %d\n", rok_n);
 			printf("Najlepsie kolo: %.3f\n",najlepsi_cas);
 			printf("Cislo kola: %d\n", kolo);
@@ -636,7 +603,7 @@ int average(void)
 		return 0;
 	}
 	
-	printf("\tFunkcia Average:\nVypis priemernych kol: \n");
+	printf("\tFunkcia Average:\nVypis priemernych kol: \n\n");
 	
 	while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
 	{
@@ -704,9 +671,9 @@ int under(void)
 		printf("Subor sa nepodarilo otvorit.\n");
 		return 0;
 	}
-	printf("\tFunkcia Under: Vypis kol pod vlozenou hodnotou.\nZadajte hodnotu: ");
+	printf("\tFunkcia Under: Vypis kol pod vlozenou hodnotou.\n>Zadajte hodnotu: ");
 	scanf("%f", &realne_cislo);
-	
+	putchar('\n');
 	if(realne_cislo > 0)
 	{
 		while((fscanf(fp, "%[^;];%c;%d;%[^;];%f;%f;%f;%f;%f\n",meno_priezvisko, &pohlavie ,&rok, znacka, &casy[0],&casy[1],&casy[2],&casy[3],&casy[4])) != EOF)
@@ -949,7 +916,7 @@ int newdriver(void)
 		}
 		if(kontrolaZnackeAuta(new_znacka))
 		{
-			printf(">Pet hodnot vo formate\n\"cas1;cas2;cas3;cas4;cas5\" : ");
+			printf(">Pet hodnot vo formate\n>\"cas1;cas2;cas3;cas4;cas5\" : ");
 			scanf("%f;%f;%f;%f;%f", &new_casy[0], &new_casy[1], &new_casy[2], &new_casy[3], &new_casy[4]);
 			for(i=0; i<MAX_RACE_ROUNDS; i++)
 			{
@@ -1116,11 +1083,48 @@ void krstneMenoPriezvisko(char *meno_priezvisko, char *krstne_meno, char *priezv
 	}
 }
 
+int kontrolaZnackeAuta(char *znacka)
+{
+	if(strcmp(znacka, "bugatti") == 0)
+	{
+		return 1;
+	}
+	else if(strcmp(znacka, "porsche") == 0)
+	{
+		return 1;
+	}
+	else if(strcmp(znacka, "ferrari") == 0)
+	{
+		return 1;
+	}
+	else if(strcmp(znacka, "honda") == 0)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int kontrolaUdajov(char* krstne_meno, char* priezvisko, char pohlavie, int rok, char* znacka, float *casy)
+{
+	if(krstne_meno != NULL && priezvisko != NULL && rok > MIN_ROK && rok <= MAX_ROK && (pohlavie == 'm' || pohlavie == 'f') && 
+		znacka != NULL && kontrolaZnackeAuta(znacka) != 0 && casy != NULL  )
+		{
+			return 1;
+		}
+		else 
+		{
+			return 0;
+		}
+}
+
 float najlepsieKolo(float *casy)
 {
 	int i;
 	float najlepsie = casy[0];
-	for(i=1; i<5; i++)
+	for(i=1; i<MAX_RACE_ROUNDS; i++)
 	{
 		if(najlepsie > casy[i])
 		{
@@ -1134,7 +1138,7 @@ float najhorsieKolo(float *casy)
 {
 	int i;
 	float najhorsie = casy[0];
-	for(i=1; i<5; i++)
+	for(i=1; i<MAX_RACE_ROUNDS; i++)
 	{
 		if(najhorsie < casy[i])
 		{
@@ -1148,11 +1152,11 @@ float priemerneKolo(float *casy)
 {
 	int i;
 	float priemer=0;
-	for(i=0; i<5; i++)
+	for(i=0; i<MAX_RACE_ROUNDS; i++)
 	{
 		priemer += casy[i];
 	}
-	return priemer/5;
+	return priemer/MAX_RACE_ROUNDS;
 }
 
 void moznosti(void)
@@ -1173,3 +1177,10 @@ void moznosti(void)
 	printf("\tPrikaz \"x\" - Ukonci program\n");
 	printf("<---------------------------------------------------------------------------------------------->\n");
 }
+
+void functionEnd(void)
+{
+	printf("------------------------------------------------------/\n");
+}
+
+
