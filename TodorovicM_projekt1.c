@@ -4,9 +4,12 @@
 #include <string.h>
 
 /*
-	Autor: Miroslav Todorovic
-	Cviciaci: Igor Stupavský
-	Datum: 28.11.2020
+	Autor: 		Miroslav Todorovic
+	Cviciaci:	Igor Stupavský
+	Predmet:	Zaklady Proceduralneho Programovania 1
+	Uloha: 		Projekt 
+	Semester: 	Zimny
+	Datum: 		29.11.2020
 */
 
 //////////////////////////////////////////////////////////
@@ -37,7 +40,7 @@ int newdriver(void);					//
 int rmdriver(void);						// 
 //////////////////////////////////////////
 
-/*	DEKLARACIA POMOCNYCH FUNKCII 																			*/
+/*									DEKLARACIA POMOCNYCH FUNKCII 											*/
 int kontrolaUdajov(char* krstne_meno, char* priezvisko, char pohlavie, int rok, char* znacka, float *casy);	//
 int kontrolaZnackeAuta(char *znacka);																		//
 void krstneMenoPriezvisko(char *meno_priezvisko, char *krstne_meno, char *priezvisko);						// 
@@ -233,7 +236,7 @@ int driver(void) 	// Funkcia vypise vsetky informacie o jazdcovi ktoreho hladame
 						printf("%.3f;", casy[i]);
 					}
 				}
-				printf("\n\n");
+				printf("\n");
 				printf("Najlepsie kolo: %.3f\n",najlepsieKolo(casy));	// Pri vypise sa vola pomocna funkcia na vypocet najlepsieho kola
 				printf("Najhorsie kolo: %.3f\n",najhorsieKolo(casy));	// Najlepsie kolo
 				printf("Priemerne kolo: %.3f\n",priemerneKolo(casy));	// Priemerne kolo
@@ -678,7 +681,7 @@ int average(void)	// Funkcia vypise priemer vsetkych jazdcov a na konci vypise j
 	free(jazdec);
 }
 
-int under(void)
+int under(void)		// Funkcia vypise kazdeho jazdca v subore a ich kola ak su pod vlozenou hodnotou
 {
 	/* premenne */
 	FILE *fp;
@@ -786,7 +789,7 @@ int under(void)
 	free(znacka);
 	free(jazdec);
 }
-int change(void)
+int change(void)	// Funkcia aktualizuje novi cas jazdca ktoreho zada pouzivatel
 {
 	/* premenne */
 	FILE *fp, *fp_tmp;
@@ -895,7 +898,7 @@ int change(void)
 	free(buffer);
 }
 
-int newdriver(void)
+int newdriver(void)	// Funkcia vlozi noveho jazdca do suboru
 {
 	/* premenne */
 	FILE *fp;
@@ -920,38 +923,37 @@ int newdriver(void)
 		printf("Subor sa nepodarilo otvorit.\n");
 		return 0;
 	}
-	
-	
+	/* Zacina funkcia newdriver, dal som do while cyklu lebo som chcel aby funkcia nepokracovala ak pouzivatel vlozi nejake blbosti */
 	while(zapis_jazdca != 0)
 	{
 		printf("\tFunkcia New Driver:\nZadajte informacie pre noveho jazdca.\n>Meno a Priezvisko: ");
 		scanf(" %[^\n]", meno_priezvisko);
 		krstneMenoPriezvisko(meno_priezvisko, new_meno, new_priezvisko);
 
-		if(new_priezvisko[0] != '\0' && new_meno[0] != '\0')
+		if(new_priezvisko[0] != '\0' && new_meno[0] != '\0') // Ak existuju meno a priezvisko, program pokracuje
 		{
-			printf(">Rok narodenia(YYYY): ");
+			printf(">Rok narodenia(YYYY): ");					// Vlozime rok 
 			scanf("%d", &new_rok);
 		}
 		else 
 		{   
-			printf("CHYBA! Musite spravne zapisat meno a priezvisko.\n");
+			printf("CHYBA! Musite spravne zapisat meno a priezvisko.\n"); // Ak neexistuje meno tak funkcia nepokracuje
 			break;
 		}
 		
-		if(new_rok < 1000 || new_rok > MAX_ROK)
+		if(new_rok < 1000 || new_rok > MAX_ROK)	// Ak je rok nespravne zapisany, funkcia nepokracuje
 		{
 			printf("CHYBA! Rok musi byt vo formate YYYY a mensi ako 2021.\n"); 
 			break;
 		}
 		else
 		{
-			printf(">Pohlavie - 'm' alebo 'f': ");
+			printf(">Pohlavie - 'm' alebo 'f': ");				// Vlozime pohlavie
 			scanf(" %s", new_pohlavie);
 		}
-		if(new_pohlavie[0] == 'm' || new_pohlavie[0] == 'f')
+		if(new_pohlavie[0] == 'm' || new_pohlavie[0] == 'f')	// Ak je pohlavie m alebo f, pokracujeme vlozit znacku auta
 		{
-			printf(">Znacku auta: ");
+			printf(">Znacku auta: ");							// Vlozime znacku
 			scanf("%s", new_znacka);
 		}
 		else
@@ -959,44 +961,55 @@ int newdriver(void)
 			printf("CHYBA! Povolene pismena su \'m\' alebo \'f\'.");
 			break;
 		}
-		if(kontrolaZnackeAuta(new_znacka))
+		if(kontrolaZnackeAuta(new_znacka))		// Ak je znacka rozna ako 4 mozne znacky tak program nepokracuje
 		{
-			printf(">Pet hodnot vo formate\n>\"cas1;cas2;cas3;cas4;cas5\" : ");
+			printf(">Pet hodnot vo formate\n>\"cas1;cas2;cas3;cas4;cas5\" : ");	// Vlozime 5 novych hodnot pre casy 
 			scanf("%f;%f;%f;%f;%f", &new_casy[0], &new_casy[1], &new_casy[2], &new_casy[3], &new_casy[4]);
-			for(i=0; i<MAX_RACE_ROUNDS; i++)
+			/* Ak sme nejaku hodnotu nezadali, ideme na for cyklus a zapisujeme ju - program ne konci ak sa pouzivatel dostane do tohto bodu */
+			for(i=0; i<MAX_RACE_ROUNDS; i++) 
 			{
-				if(new_casy[i] == 0)
+				if(new_casy[i] < 10) // Musi byt dvojciferne cislo aby sa dodrziaval format
 				{
-					printf("Nezapisali ste dobre %d cas.\nZapiste teraz: ", i+1);
+					printf("Nezapisali ste dobre %d cas.\nZapiste este raz: ", i+1);
 					scanf("%f", &new_casy[i]);
-					
-					if(new_casy[i] <= 0)
-					{
-						printf("Stale nie je dobre zapisany.\nZapiste este raz: ");
-						scanf("%f", &new_casy[i]);
-						i--;
-					}
+					i--;	// zmensi za i pre istotu ak pouzivatel vlozil zlu hodnotu znovu
+					continue;
+				}
+				else if(new_casy[i] >= 100)
+				{
+					printf("Nezapisali ste dobre %d cas.\nZapiste este raz: ", i+1);
+					scanf("%f", &new_casy[i]);
+					i--;
+					continue;
+				}
+				else
+				{
+					continue;
 				}
 			}
 		}
 		else
 		{
-			printf("CHYBA! Mozne znacky su: bugatti, ferrari, porsche a honda.");
+			printf("CHYBA! Mozne znacky su: bugatti, ferrari, porsche a honda."); // Sprava pre vypis ak je vlozena znacka ina ako povolena
 			break;
 		}
 		
-		while(1)
+		while(1)	// Ak program neskoncil do teraz, znamena ze mame vsetky udaje a ideme na koniec suboru aby sme ich zapisali 
 		{
-			fgets(buffer, 1000, fp);
-			if(feof(fp))
+			fgets(buffer, 1000, fp); // Kazdy riadok dame do buffera lebo nepotrebujeme tieto informacie
+			if(buffer[strlen(buffer) - 1] != '\n') // Ak sa na koniec riadku nenachadza '\n' pridame ho, aby subor pekne vyzeral :)
+			{
+				fprintf(fp, "\n");
+			}
+			if(feof(fp))	// Ak sme na koniec suboru, zapiseme noveho jazdca a funkcia skonci while cyklus
 			{
 				fprintf(fp, "%s %s;%c;%d;%s;%.3f;%.3f;%.3f;%.3f;%.3f", new_meno, new_priezvisko, new_pohlavie[0], new_rok, new_znacka,
 																	 new_casy[0],new_casy[1],new_casy[2],new_casy[3],new_casy[4]);
 				fprintf(fp, "\n");
 				break;
-			}
+			} 
 		}
-		zapis_jazdca--;	
+		zapis_jazdca--;	// Tato premenna sa zmensi ak sme zapisali jazdca
 	}
 	/* Zatvarame subor a testujeme ci sa zatvoril */
 	if(fclose(fp) == EOF)
@@ -1005,7 +1018,7 @@ int newdriver(void)
 		return 0;
 	}
 	
-	if(zapis_jazdca == 0)
+	if(zapis_jazdca == 0) // Ak je 0, novi jazdec je zapisany a zavolame funkciu sum. Na konci bude novi jazdec
 	{
 		sum();
 	}
@@ -1018,7 +1031,7 @@ int newdriver(void)
 	free(buffer);
 }
 
-int rmdriver(void)
+int rmdriver(void)	// Funkcia zmaze zadaneho jazdca zo suboru
 {
 	/* premenne */
 	FILE *fp, *fp_tmp;
@@ -1046,35 +1059,36 @@ int rmdriver(void)
 			return 0;
 		}
 	
+	/* Pre tuto funkciu potrebujeme aj temporary subor do ktoreho ukladame jazdcov ale okrem toho ktoreho chceme zmazat */
 	printf("\tFunkcia Remove Driver:\n");
-	printf("Zadajte priezvisko jazdca ktoreho chcete odstranit z tabulke: ");
+	printf("Zadajte priezvisko jazdca ktoreho chcete odstranit z tabulke: ");		// Funkcia najprv ziada od pouzivatela o priezvisko jazdca ktore ma zmazat zo suboru
 	scanf("%s", priezvisko_zmazat);
 	
-	if(priezvisko_zmazat != NULL)
+	if(priezvisko_zmazat != NULL) // Ak pouzivatel zadal spravne priezvisko, funkcia pokracuje
 	{
 		while((fscanf(fp, "%[^;]%s\n",meno_priezvisko, buffer)) != EOF)
 		{
-			krstneMenoPriezvisko(meno_priezvisko, krstne_meno, priezvisko);
-			if(strcmp(priezvisko, priezvisko_zmazat) != 0)
+			krstneMenoPriezvisko(meno_priezvisko, krstne_meno, priezvisko); // Oddelime meno a priezvisko
+			
+			if(strcmp(priezvisko, priezvisko_zmazat) != 0)		// Porovnavame jazdcov a hladame toho jazdca ktoreho chceme zmazat
 			{
-				fprintf(fp_tmp,"%s %s%s\n", krstne_meno, priezvisko, buffer);
+				fprintf(fp_tmp,"%s %s%s\n", krstne_meno, priezvisko, buffer);	// Ak sa priezviska nerovnaju, vypisuju sa udaje do noveho suboru
 			}
 			else
 			{
-				printf("Jazdec s menom \"%s %s\" bol vymazany.\n", krstne_meno, priezvisko);
-				functionEnd();
-				jazdec_najden++;
+				printf("Jazdec s menom \"%s %s\" bol vymazany.\n", krstne_meno, priezvisko);	// Ak sme nasli jazdca, funkcia jednoducho pokracuje a do noveho suboru sa nezapise jazdec so zadanim priezviskom
+				functionEnd();				// Nakresli ciaru
+				jazdec_najden++;			// Nasli sme jazdca, a tato premenna potom nie je 0
 			}	
 		}
 	}
 	else
 	{
-		printf("CHYBA! Zadajte priezvisko.\n");	
+		printf("CHYBA! Zadajte priezvisko.\n");	//Ak puzivatel zadal iba pismeno, vypise sa tato sprava
 	}
-	
 	if(jazdec_najden == 0)
 	{
-		printf("Jazdec s priezviskom \"%s\" nebol najden v tabulke.\n", priezvisko_zmazat);
+		printf("Jazdec s priezviskom \"%s\" nebol najden v tabulke.\n", priezvisko_zmazat); // Ak funkcia nenasla zadane priezvisko, vyspise sa tato sprava
 	}
 	/* Zatvarame subory a testujeme ci sa zatvorili */
 	if(fclose(fp_tmp) == EOF)
@@ -1099,15 +1113,15 @@ int rmdriver(void)
 	free(buffer);
 }
 
-void krstneMenoPriezvisko(char *meno_priezvisko, char *krstne_meno, char *priezvisko)
+void krstneMenoPriezvisko(char *meno_priezvisko, char *krstne_meno, char *priezvisko) // Funkcia oddeli meno a priezvisko
 {
 	int i, j, n;
-	n = strlen(meno_priezvisko);
+	n = strlen(meno_priezvisko);	// Velkost retazca
 	j = n;
 
 	for(i=n-1; i>=0; i--)
 	{
-		if(meno_priezvisko[i] != ' ')
+		if(meno_priezvisko[i] != ' ')	// Hlada medzeru, a ak najde zapamata poziciu a ukonci cyklus
 		{
 			j--;
 		}
@@ -1117,7 +1131,7 @@ void krstneMenoPriezvisko(char *meno_priezvisko, char *krstne_meno, char *priezv
 			break;
 		}
 	}
-	if(j != 0)
+	if(j != 0)	//Ak nenasiel medzeru, neoddeluje nic
 	{
 		for(i=0; i<n; i++)
 		{
@@ -1135,14 +1149,14 @@ void krstneMenoPriezvisko(char *meno_priezvisko, char *krstne_meno, char *priezv
 	}
 	else
 	{
-		priezvisko[0] = '\0'; 
+		priezvisko[0] = '\0';  //Nastavi na biele znaky ak funkcia nic neurobi
 		krstne_meno[0] = '\0';
 	}
 }
 
-int kontrolaZnackeAuta(char *znacka)
+int kontrolaZnackeAuta(char *znacka)	// Funkcia kontroluje nacitanu znacku
 {
-	if(strcmp(znacka, "bugatti") == 0)
+	if(strcmp(znacka, "bugatti") == 0)	// Porovnava ci nacitana znacka existuje v zozname moznych znaciek a vrati 1 ak je
 	{
 		return 1;
 	}
@@ -1160,11 +1174,11 @@ int kontrolaZnackeAuta(char *znacka)
 	}
 	else
 	{
-		return 0;
+		return 0;	// Vrati 0 ak neexistuje znacka
 	}
 }
 
-int kontrolaUdajov(char* krstne_meno, char* priezvisko, char pohlavie, int rok, char* znacka, float *casy)
+int kontrolaUdajov(char* krstne_meno, char* priezvisko, char pohlavie, int rok, char* znacka, float *casy)	// Funkcia kontroluje vsetky udaje ci nie su NULL
 {
 	if(krstne_meno != NULL && priezvisko != NULL && rok > MIN_ROK && rok <= MAX_ROK && (pohlavie == 'm' || pohlavie == 'f') && 
 		znacka != NULL && kontrolaZnackeAuta(znacka) != 0 && casy != NULL  )
@@ -1177,7 +1191,7 @@ int kontrolaUdajov(char* krstne_meno, char* priezvisko, char pohlavie, int rok, 
 		}
 }
 
-float najlepsieKolo(float *casy)
+float najlepsieKolo(float *casy) 	// Funkcia vrati najlepsie kolo z 5 moznych
 {
 	int i;
 	float najlepsie = casy[0];
@@ -1191,7 +1205,7 @@ float najlepsieKolo(float *casy)
 	return najlepsie;
 }
 
-float najhorsieKolo(float *casy)
+float najhorsieKolo(float *casy)	// Funkcia vrati najhorsie kolo z 5 moznych
 {
 	int i;
 	float najhorsie = casy[0];
@@ -1205,7 +1219,7 @@ float najhorsieKolo(float *casy)
 	return najhorsie;
 }
 
-float priemerneKolo(float *casy)
+float priemerneKolo(float *casy)	// Funkcia vrati priemerne kolo
 {
 	int i;
 	float priemer=0;
@@ -1216,7 +1230,7 @@ float priemerneKolo(float *casy)
 	return priemer/MAX_RACE_ROUNDS;
 }
 
-void moznosti(void)
+void moznosti(void)					// Funkcia vypise moznosti pre pouzivatela
 {
 	printf("Moznosti pre pouzivatela:\n");
 	printf("\tPrikaz \"s\" - Funkcia sum(): Vypis hodnot\n");
@@ -1235,7 +1249,7 @@ void moznosti(void)
 	printf("<---------------------------------------------------------------------------------------------->\n");
 }
 
-void functionEnd(void)
+void functionEnd(void)				// Funkcia iba nakresli ciaru :(
 {
 	printf("------------------------------------------------------/\n");
 }
