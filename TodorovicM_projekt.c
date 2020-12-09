@@ -718,8 +718,7 @@ int under(void)		// Funkcia vypise kazdeho jazdca v subore a ich kola ak su pod 
 	
 			if(kontrolaUdajov(krstne_meno, priezvisko, pohlavie, rok, znacka, casy)) // Pomocna funkcia kontroluje ci su vsetky udaje spravne nacitane 
 			{
-				kola = 0;
-				printf("%s - ", meno_priezvisko); 
+				kola = 0; 
 				for(i=0; i<MAX_RACE_ROUNDS; i++)	// For cyklus aby sme nasli pocet kol ktore su pod vlozenou hodnotou
 				{
 					if(realne_cislo >= casy[i])
@@ -730,18 +729,21 @@ int under(void)		// Funkcia vypise kazdeho jazdca v subore a ich kola ak su pod 
 				/* Gramaticky spravne vypisy pre pocet kol :) */
 				if(kola > 1 && kola < MAX_RACE_ROUNDS)
 				{
+					printf("%s - ", meno_priezvisko);
 					printf("%d kola, ", kola);
 				}
 				else if(kola == 0)
 				{
-					printf("%d kol\n", kola);
+					
 				}
 				else if(kola == 1)
 				{
+					printf("%s - ", meno_priezvisko);
 					printf("%d kolo, ", kola);
 				}
 				else
 				{	
+				printf("%s - ", meno_priezvisko);
 					printf("%d kol, ", kola);
 				}
 				
